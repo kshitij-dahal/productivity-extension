@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "Productivity Solution",
+  "version": "1.0",
+  "default_locale": "en",
+  "author": "Kshitij Dahal",
+
+  "browser_action": {
+    "default_title": "Productivity Solution",
+    "default_popup": "popup.html"
+  },
+
+  "background": {
+    "scripts": ["block-youtube.js"],
+    "persistent": false
+  }
+}
