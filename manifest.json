@@ -10,8 +10,15 @@
     "default_popup": "popup.html"
   },
 
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/watch?v=*"],
+      "js": ["block-youtube.js"]
+    }
+  ],
+
   "background": {
-    "scripts": ["block-youtube.js"],
+    "scripts": ["background.js"],
     "persistent": false
   }
 }
