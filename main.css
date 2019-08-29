@@ -1,0 +1,25 @@
+body {
+  width: 200px;
+}
+
+button {
+  width: 90%;
+  height: 40px;
+  margin: auto;
+  display: block;
+}
+
+#btn_text {
+  font-size: 16px;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+#timer_container {
+  height: 50px;
+  text-align: center;
+}
+
+#bth_container {
+  height: 50px;
+  text-align: center;
+}

@@ -12,7 +12,7 @@ function establishLongConnection() {
 
 chrome.runtime.onMessage.addListener(function(request, sender) {
   if (request.msg == "pop") {
-    alert("its open");
+    // alert("its open");
     establishLongConnection();
   }
 });
