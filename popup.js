@@ -2,6 +2,7 @@ var timer_min;
 var timer_sec;
 
 // indicate to background.js that popup.html has opened and receive current timer values
+// then begin timer
 function establish_connection(port) {
   port.postMessage({ msg: "hello man" });
   port.onMessage.addListener(function(msg) {
