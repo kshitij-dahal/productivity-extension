@@ -21,7 +21,7 @@ function establish_long_connection(request, sender) {
   if (request.msg == "popup_open") {
     var port = chrome.runtime.connect({ name: "timer_request" });
     port.postMessage({
-      bth_text: local_btn_text,
+      btn_text: local_btn_text,
       timer_min: local_min,
       timer_sec: local_sec
     });
@@ -30,6 +30,15 @@ function establish_long_connection(request, sender) {
     });
     port.onDisconnect.addListener(function() {
       console.log("disconnected");
+      chrome.storage.sync.get("timer_min", function(result) {
+        console.log(result.timer_min);
+      });
+      chrome.storage.sync.get("timer_sec", function(result) {
+        console.log(result.timer_sec);
+      });
+      chrome.storage.sync.get("btn_text", function(result) {
+        console.log(result.btn_text);
+      });
     });
   } else {
   }
@@ -39,8 +48,10 @@ function configure_timer(changes, namespace) {
   if (changes.hasOwnProperty("btn_text")) {
     if (changes["btn_text"].newValue == "PAUSE") {
       interval = setInterval(run_timer, 1000);
+      local_btn_text = "PAUSE";
     } else if (changes["btn_text"].newValue == "CONTINUE") {
       clearInterval(interval);
+      local_btn_text = "CONTINUE";
     }
   }
 }

@@ -11,17 +11,29 @@ function establish_connection(port) {
     timer_min_local = msg.timer_min;
     timer_sec_local = msg.timer_sec;
     timer_state = msg.btn_text;
-    console.log(timer_min_local + ":" + timer_sec_local);
-    update_timer_values();
-    configure_timer();
+
+    console.log(
+      "GOTTEEEE" +
+        timer_state +
+        "Eeee" +
+        timer_min_local +
+        ":" +
+        timer_sec_local
+    );
+    update_timer_values(); // update the min and secfrom storage
+    set_initial_btn_text();
   });
 }
 
-function configure_timer() {
-  if (timer_state == "PAUSE") {
-    timer_run_interval = setInterval(run_timer, 1000);
-  } else if (timer_state == "CONTINUE") {
-    clearInterval(timer_run_interval);
+function set_initial_btn_text() {
+  if (timer_state != "START") {
+    if (timer_state == "PAUSE") {
+      timer_state = "CONTINUE";
+      change_btn_text();
+    }
+    var btn_node = document.querySelector("#btn_text");
+    btn_node.removeChild(btn_node.firstChild);
+    btn_node.appendChild(document.createTextNode(timer_state));
   }
 }
 
@@ -53,6 +65,14 @@ function update_timer_values() {
   timer_text[3].removeChild(timer_text[3].firstChild);
   timer_text[1].appendChild(min_text);
   timer_text[3].appendChild(sec_text);
+}
+
+function configure_timer() {
+  if (timer_state == "PAUSE") {
+    timer_run_interval = setInterval(run_timer, 1000);
+  } else if (timer_state == "CONTINUE") {
+    clearInterval(timer_run_interval);
+  }
 }
 
 // update the text on button in popup.html
