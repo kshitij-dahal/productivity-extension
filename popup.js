@@ -1,20 +1,8 @@
-// connect with background.js to receive timer information
-/*var port = chrome.runtime.connect({ name: "timer_request" });
-port.onMessage.addListener(function(msg) {
-  var timer_min = msg.getMinutes();
-  var timer_sec = msg.getSeconds();
-  alert(timer_min);
-  alert(timer_sec);
-});
-chrome.runtime.onConnect.addListener(function(port) {
-    port.postMessage(new Date());
-  });
-  */
-
 var timer_min;
 var timer_sec;
-chrome.runtime.sendMessage({ msg: "pop" });
-chrome.runtime.onConnect.addListener(function(port) {
+
+// indicate to background.js that popup.html has opened and receive current timer values
+function establish_connection(port) {
   port.postMessage({ msg: "hello man" });
   port.onMessage.addListener(function(msg) {
     timer_min = msg.timer_min;
@@ -22,11 +10,11 @@ chrome.runtime.onConnect.addListener(function(port) {
     console.log(timer_min + ":" + timer_sec);
     setInterval(update_timer, 1000);
   });
-});
+}
 
-var timer_text;
+// show current timer values on popup.html and then update it
 function update_timer() {
-  timer_text = document.querySelectorAll("span");
+  var timer_text = document.querySelectorAll("span");
   var min_text, sec_text;
   if (timer_min < 10) {
     min_text = document.createTextNode("0" + timer_min);
@@ -50,17 +38,24 @@ function update_timer() {
   }
 }
 
-var btn_clicked = document.querySelector("button");
-btn_clicked.addEventListener("click", change_btn_text, false);
-
+// update the text on button in popup.html
 function change_btn_text() {
   var btn_text = document.querySelector("#btn_text");
-  if (btn_text.innerHTML == "START") {
-    btn_text.innerHTML = "PAUSE";
-  } else if (btn_text.innerHTML == "PAUSE") {
-    btn_text.innerHTML = "CONTINUE";
+  var new_text_node;
+  if (btn_text.firstChild.textContent == "START") {
+    new_text_node = document.createTextNode("PAUSE");
+  } else if (btn_text.firstChild.textContent == "PAUSE") {
+    new_text_node = document.createTextNode("CONTINUE");
   } else {
-    btn_text.innerHTML = "PAUSE";
+    new_text_node = document.createTextNode("PAUSE");
   }
-  chrome.storage.sync.set({ btn_text: btn_text.innerHTML });
+  btn_text.removeChild(btn_text.firstChild);
+  btn_text.appendChild(new_text_node);
+  chrome.storage.sync.set({ btn_text: btn_text.firstChild.textContent });
 }
+
+chrome.runtime.sendMessage({ msg: "pop" });
+chrome.runtime.onConnect.addListener(establish_connection(port));
+
+var btn_clicked = document.querySelector("button");
+btn_clicked.addEventListener("click", change_btn_text, false);
