@@ -55,7 +55,7 @@ function change_btn_text() {
 }
 
 chrome.runtime.sendMessage({ msg: "pop" });
-chrome.runtime.onConnect.addListener(establish_connection(port));
+chrome.runtime.onConnect.addListener(establish_connection);
 
 var btn_clicked = document.querySelector("button");
 btn_clicked.addEventListener("click", change_btn_text, false);
