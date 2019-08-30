@@ -1,5 +1,7 @@
 var local_min;
 var local_sec;
+var local_btn_text;
+var interval;
 
 // upon first install, store 00:00 for value of timer in the storage
 function store_initial_timer_values(info) {
@@ -16,16 +18,30 @@ function store_initial_timer_values(info) {
 // open a long-lived channel to popup.js and send current timer value,
 // then start the timer
 function establish_long_connection(request, sender) {
-  if (request.msg == "pop") {
+  if (request.msg == "popup_open") {
     var port = chrome.runtime.connect({ name: "timer_request" });
-    port.postMessage({ timer_min: local_min, timer_sec: local_sec });
+    port.postMessage({
+      bth_text: local_btn_text,
+      timer_min: local_min,
+      timer_sec: local_sec
+    });
     port.onMessage.addListener(function(msg) {
-      alert(msg.msg);
-      var interval = setInterval(run_timer, 1000);
+      console.log(msg.msg);
     });
     port.onDisconnect.addListener(function() {
-      alert("disconnected");
+      console.log("disconnected");
     });
+  } else {
+  }
+}
+
+function configure_timer(changes, namespace) {
+  if (changes.hasOwnProperty("btn_text")) {
+    if (changes["btn_text"].newValue == "PAUSE") {
+      interval = setInterval(run_timer, 1000);
+    } else if (changes["btn_text"].newValue == "CONTINUE") {
+      clearInterval(interval);
+    }
   }
 }
 
@@ -48,3 +64,7 @@ chrome.storage.sync.get("timer_min", function(result) {
 chrome.storage.sync.get("timer_sec", function(result) {
   local_sec = result.timer_sec;
 });
+chrome.storage.sync.get("btn_text", function(result) {
+  local_btn_text = result.btn_text;
+});
+chrome.storage.onChanged.addListener(configure_timer);
