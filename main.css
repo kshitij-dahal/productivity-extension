@@ -1,25 +1,55 @@
-body {
+/* START: align button and timer display horizontally to the centre */
+#main_container {
+  text-align: center;
   width: 200px;
+}
+/* END */
+
+/* START: design button */
+button {
+  width: 180px;
+  height: 38px;
+  border: green solid 3px;
+  font-weight: 500;
+  color: green;
+  font-size: 20px;
+  font-family: "Courier New", Arial, Helvetica, sans-serif;
+}
+
+button:hover {
+  background-color: green;
+  color: white;
+}
+
+button:focus {
+  outline: 0;
+}
+/* END */
+
+/* START: design timer text */
+#timer_container {
+  font-weight: 500;
+  color: green;
+  font-size: 20px;
+  font-family: "Courier New", Arial, Helvetica, sans-serif;
+}
+
+/* START: align button and timer display vertically to the centre*/
+#btn_container,
+#timer_container_wrapper {
+  display: block;
+  height: 40px;
 }
 
 button {
-  width: 90%;
-  height: 40px;
-  margin: auto;
-  display: block;
-}
-
-#btn_text {
-  font-size: 16px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 #timer_container {
-  height: 50px;
-  text-align: center;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
 }
-
-#bth_container {
-  height: 50px;
-  text-align: center;
-}
+/* END */
