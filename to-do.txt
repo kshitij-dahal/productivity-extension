@@ -1,0 +1,14 @@
+v1
+- if button in pause state, change its and the timers colour to red
+- if button in continue state, change its and the timers colour to green
+- restart timer if it is a new day
+- reconsider timer formatting (eg. 11m23s)
+- add hour in timer
+
+v2
+- if its new day, store last days value in storage
+- give user the option to view graph 
+- allow user to set daily goal
+- show graph with whether or not daily goal was met
+- allow user to set notification when a certain amount of time has passed (eg. 25 min similar to pomodoro)
+
