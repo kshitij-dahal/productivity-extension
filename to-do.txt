@@ -1,7 +1,7 @@
 v1
 - if button in pause state, change its and the timers colour to red
 - if button in continue state, change its and the timers colour to green
-- restart timer if it is a new day
+- restart timer if it is a new day x
 - reconsider timer formatting (eg. 11m23s)
 - add hour in timer
 
