@@ -3,11 +3,32 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Document</title>
   </head>
   <body>
-    <p>hello</p>
+    <section id="setup">
+      <div id="timer_container">
+        <span>00</span>
+        <span>:</span>
+        <span>00</span>
+        <span>:</span>
+        <span>00</span>
+      </div>
+      <div>
+        <button id="settings_btn">Settings</button>
+      </div>
+      <div>
+        <button id="start_timer_btn">
+          <span id="btn_text" class="text">
+            START
+          </span>
+        </button>
+      </div>
+      <div id="goal_setup">
+        <form>GOAL: <input type="text" name="daily_goal" /></form>
+      </div>
+    </section>
+    <section id="data_view"></section>
     <script src="newtab.js"></script>
   </body>
 </html>
