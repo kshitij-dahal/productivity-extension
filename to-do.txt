@@ -7,7 +7,7 @@ v1
 - if its new day, store last days value in storage x
 - show the days that the goal was met on the calendar in newtab
 - create options page
-- create new tab page
+- create new tab page -- 
 - add pomodoro mode
 - add calendar streak view
 - add calendar time view

@@ -25,7 +25,8 @@ function store_initial_timer_values(info) {
         timer_sec: 0,
         curr_year: year,
         curr_month: month,
-        curr_date: day
+        curr_date: day,
+        goal: -1
       },
       function() {
         console.log("stored it");
@@ -41,18 +42,18 @@ function store_initial_timer_values(info) {
 // then start the timer
 function establish_long_connection(request, sender) {
   if (request.msg == "popup_open") {
-    var port = chrome.runtime.connect({ name: "timer_request" });
-    port.postMessage({
+    var popup_port = chrome.runtime.connect({ name: "timer_request" });
+    popup_port.postMessage({
       btn_text: local_btn_text,
       timer_min: local_min,
       timer_sec: local_sec,
       timer_hr: local_hr
     });
     console.log("sent msg");
-    port.onMessage.addListener(function(msg) {
+    popup_port.onMessage.addListener(function(msg) {
       console.log(msg.msg);
     });
-    port.onDisconnect.addListener(function() {
+    popup_port.onDisconnect.addListener(function() {
       console.log("disconnected");
       chrome.storage.sync.get(
         ["timer_hr", "timer_min", "timer_sec", "btn_text"],

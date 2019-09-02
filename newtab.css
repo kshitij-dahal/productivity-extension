@@ -44,7 +44,14 @@ input:focus {
   border: none;
   border-bottom: 2px solid black;
   width: 50px;
+  transition: border 2s linear;
   text-align: center;
   font-size: inherit;
   outline: 0;
+  -webkit-transition: color 1s; /* For Safari 3.1 to 6.0 */
+  transition: color 1s;
+}
+
+input:disabled {
+  color: green;
 }
