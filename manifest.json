@@ -8,9 +8,13 @@
     "default_title": "Productivity Solution",
     "default_popup": "popup.html"
   },
-  "permissions": ["tabs", "storage"],
+  "permissions": ["tabs", "storage", "activeTab"],
   "background": {
     "scripts": ["background.js"]
+  },
+
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
   },
 
   "content_scripts": [

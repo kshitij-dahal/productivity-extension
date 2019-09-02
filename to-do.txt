@@ -6,10 +6,10 @@ v1
 - add hour in timer x
 
 v2
-- if its new day, store last days value in storage
+- if its new day, store last days value in storage x
 - give user the option to view graph 
 - - have 2 graph options: streaks view as calendar or graph view with exact time studied
 - allow user to set daily goal
 - show graph with whether or not daily goal was met
 - allow user to set notification when a certain amount of time has passed (eg. 25 min similar to pomodoro)
-
+- add icon (2 separate icons for timer running and timer paused)

@@ -62,6 +62,15 @@ function configure_timer(changes, namespace) {
       local_btn_text = "CONTINUE";
     }
   }
+  if (changes.hasOwnProperty("timer_hr")) {
+    local_hr = changes["timer_hr"].newValue;
+  }
+  if (changes.hasOwnProperty("timer_min")) {
+    local_min = changes["timer_min"].newValue;
+  }
+  if (changes.hasOwnProperty("timer_sec")) {
+    local_sec = changes["timer_sec"].newValue;
+  }
 }
 
 // update local timer values
@@ -112,6 +121,17 @@ function check_if_new_day() {
     /*
     MISSING: if decided to add storing feature, include the storage of current time into database here 
     */
+    var storage_key =
+      today_date.getFullYear() + today_date.getMonth() + today_date.getDate();
+
+    var storage_time = {
+      hr: local_hr,
+      min: local_min,
+      sec: local_sec
+    };
+    chrome.storage.sync.set({
+      timer_db: { storage_key: storage_time }
+    });
     // they all dont match thus it is the first time being opened today
     local_hr = 0;
     local_min = 0;
