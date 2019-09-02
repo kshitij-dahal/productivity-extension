@@ -35,10 +35,10 @@ function set_initial_btn_text() {
       timer_state = "CONTINUE";
       change_btn_text();
     }
-    var btn_node = document.querySelector("#btn_text");
-    btn_node.removeChild(btn_node.firstChild);
-    btn_node.appendChild(document.createTextNode(timer_state));
   }
+  var btn_node = document.querySelector("#btn_text");
+  btn_node.removeChild(btn_node.firstChild);
+  btn_node.appendChild(document.createTextNode(timer_state));
 }
 
 // update timer and then show current timer values on popup.html
@@ -54,33 +54,6 @@ function run_timer() {
     timer_min_local = 0;
   }
   update_timer_values();
-}
-
-// returns a formatted text node based on whether the values of timer_val is
-// less than 10 in order to make it two digits
-function return_formatted_timer_text_node(timer_val) {
-  if (timer_val < 10) {
-    return document.createTextNode("0" + timer_val);
-  } else {
-    return document.createTextNode(timer_val);
-  }
-}
-
-// update timer values in popup.html
-function update_timer_values() {
-  var timer_text = document.querySelectorAll("span");
-  var min_text, sec_text, hr_text;
-
-  hr_text = return_formatted_timer_text_node(timer_hr_local);
-  min_text = return_formatted_timer_text_node(timer_min_local);
-  sec_text = return_formatted_timer_text_node(timer_sec_local);
-
-  timer_text[1].removeChild(timer_text[1].firstChild);
-  timer_text[1].appendChild(hr_text);
-  timer_text[3].removeChild(timer_text[3].firstChild);
-  timer_text[3].appendChild(min_text);
-  timer_text[5].removeChild(timer_text[5].firstChild);
-  timer_text[5].appendChild(sec_text);
 }
 
 // run timer if timer state is pause or if it is continue, then stop the timer
@@ -120,5 +93,5 @@ function change_btn_text() {
 chrome.runtime.sendMessage({ msg: "popup_open" });
 chrome.runtime.onConnect.addListener(establish_connection);
 
-var btn_clicked = document.querySelector("button");
+var btn_clicked = document.querySelector("#start_timer_btn");
 btn_clicked.addEventListener("click", change_btn_text, false);

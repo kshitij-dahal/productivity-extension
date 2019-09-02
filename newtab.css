@@ -1,0 +1,50 @@
+/* START: design timer text */
+#timer_container {
+  font-weight: 500;
+  color: green;
+  font-size: 27px;
+  font-family: "Courier New", Arial, Helvetica, sans-serif;
+  float: left;
+  margin-left: 70px;
+  margin-top: 20px;
+}
+
+#settings_btn,
+#settings_btn:focus {
+  border: none;
+  font-weight: 500;
+  color: green;
+  font-size: 27px;
+  font-family: "Courier New", Arial, Helvetica, sans-serif;
+  float: right;
+  margin-right: 70px;
+  margin-top: 20px;
+  outline: 0;
+}
+
+#settings_btn:active {
+  color: orange;
+}
+
+#settings_btn:hover {
+  border: rgba(226, 226, 226, 0) solid 3px;
+}
+
+#goal_setup {
+  margin: 0 auto;
+  width: 200px;
+  padding-top: 120px;
+  text-align: center;
+  font-size: 35px;
+  font-family: "Courier New", Arial, Helvetica, sans-serif;
+}
+
+input,
+input:focus {
+  border: none;
+  border-bottom: 2px solid black;
+  width: 50px;
+  text-align: center;
+  font-size: inherit;
+  outline: 0;
+}

@@ -3,6 +3,7 @@ var local_sec;
 var local_hr;
 var local_btn_text;
 var interval;
+var initial = false;
 
 // upon first install, store 00:00 for value of timer in the storage
 function store_initial_timer_values(info) {
@@ -12,16 +13,26 @@ function store_initial_timer_values(info) {
     var year = today.getFullYear();
     var month = today.getMonth();
     var day = today.getDate();
-    chrome.storage.sync.set({
-      btn_text: "START",
-      timer_hr: 0,
-      timer_min: 0,
-      timer_sec: 0,
-      curr_year: year,
-      curr_month: month,
-      curr_date: day
-    });
-    console.log("stored it");
+    local_min = 0;
+    local_sec = 0;
+    local_hr = 0;
+    local_btn_text = "START";
+    chrome.storage.sync.set(
+      {
+        btn_text: "START",
+        timer_hr: 0,
+        timer_min: 0,
+        timer_sec: 0,
+        curr_year: year,
+        curr_month: month,
+        curr_date: day
+      },
+      function() {
+        console.log("stored it");
+      }
+    );
+
+    initial = true;
   }
 }
 
@@ -37,6 +48,7 @@ function establish_long_connection(request, sender) {
       timer_sec: local_sec,
       timer_hr: local_hr
     });
+    console.log("sent msg");
     port.onMessage.addListener(function(msg) {
       console.log(msg.msg);
     });
@@ -52,6 +64,7 @@ function establish_long_connection(request, sender) {
         }
       );
     });
+  } else if ((request.msg = "newtab_open")) {
   }
 }
 
@@ -167,7 +180,7 @@ function reset_timer_today(request, sender, today_date) {
 }
 
 chrome.runtime.onInstalled.addListener(store_initial_timer_values);
-chrome.runtime.onMessage.addListener(check_if_new_day);
+
 chrome.storage.sync.get(
   ["timer_hr", "timer_min", "timer_sec", "btn_text"],
   function(result) {
@@ -175,6 +188,8 @@ chrome.storage.sync.get(
     local_min = result.timer_min;
     local_sec = result.timer_sec;
     local_btn_text = result.btn_text;
+    console.log("gotem " + local_btn_text);
+    chrome.runtime.onMessage.addListener(check_if_new_day);
   }
 );
 chrome.storage.onChanged.addListener(configure_timer);
