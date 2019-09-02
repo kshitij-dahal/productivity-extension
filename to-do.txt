@@ -4,12 +4,21 @@ v1
 - restart timer if it is a new day x
 - reconsider timer formatting (eg. 11m23s)
 - add hour in timer x
+- if its new day, store last days value in storage x
+- show the days that the goal was met on the calendar in newtab
+- create options page
+- create new tab page
+- add pomodoro mode
+- add calendar streak view
+- add calendar time view
 
 v2
-- if its new day, store last days value in storage x
 - give user the option to view graph 
 - - have 2 graph options: streaks view as calendar or graph view with exact time studied
 - allow user to set daily goal
 - show graph with whether or not daily goal was met
 - allow user to set notification when a certain amount of time has passed (eg. 25 min similar to pomodoro)
 - add icon (2 separate icons for timer running and timer paused)
+
+
+// 2:22:34

@@ -8,13 +8,19 @@ var interval;
 function store_initial_timer_values(info) {
   if (info.reason == "install" || info.reason == "update") {
     var today = new Date();
+    var year = today.getFullYear();
+    var month = today.getMonth();
+    var day = today.getDate();
     chrome.storage.sync.set({
       btn_text: "START",
       timer_hr: 0,
       timer_min: 0,
       timer_sec: 0,
-      current_date: today
+      curr_year: year,
+      curr_month: month,
+      curr_date: day
     });
+    console.log("stored it");
   }
 }
 
@@ -22,7 +28,6 @@ function store_initial_timer_values(info) {
 // open a long-lived channel to popup.js and send current timer value,
 // then start the timer
 function establish_long_connection(request, sender) {
-  //check_if_new_day();
   if (request.msg == "popup_open") {
     var port = chrome.runtime.connect({ name: "timer_request" });
     port.postMessage({
@@ -36,18 +41,15 @@ function establish_long_connection(request, sender) {
     });
     port.onDisconnect.addListener(function() {
       console.log("disconnected");
-      chrome.storage.sync.get("timer_hr", function(result) {
-        console.log(result.timer_hr);
-      });
-      chrome.storage.sync.get("timer_min", function(result) {
-        console.log(result.timer_min);
-      });
-      chrome.storage.sync.get("timer_sec", function(result) {
-        console.log(result.timer_sec);
-      });
-      chrome.storage.sync.get("btn_text", function(result) {
-        console.log(result.btn_text);
-      });
+      chrome.storage.sync.get(
+        ["timer_hr", "timer_min", "timer_sec", "btn_text"],
+        function(result) {
+          console.log(result.timer_hr);
+          console.log(result.timer_min);
+          console.log(result.timer_sec);
+          console.log(result.btn_text);
+        }
+      );
     });
   }
 }
@@ -85,11 +87,11 @@ function run_timer() {
     local_hr++;
     local_min = 0;
   }
-  console.log(local_min, local_sec);
+  console.log(local_hr, local_min, local_sec);
 }
 
 chrome.runtime.onInstalled.addListener(store_initial_timer_values);
-chrome.runtime.onMessage.addListener(establish_long_connection);
+chrome.runtime.onMessage.addListener(check_if_new_day);
 chrome.storage.sync.get("timer_hr", function(result) {
   local_hr = result.timer_hr;
 });
@@ -104,45 +106,71 @@ chrome.storage.sync.get("btn_text", function(result) {
 });
 chrome.storage.onChanged.addListener(configure_timer);
 
-function check_if_new_day() {
+function check_if_new_day(request, sender) {
   var today_date = new Date();
-  var stored_date;
-  chrome.storage.sync.get("current_date", function(result) {
-    stored_date = result.current_date;
-  });
-
-  if (
-    !(
-      today_date.getDate() == stored_date.getDate() &&
-      today_date.getMonth() == stored_date.getMonth() &&
-      today_date.getFullYear() == stored_date.getFullYear()
-    )
+  console.log(
+    "todays date not storage, first yr" +
+      today_date.getFullYear() +
+      "then month" +
+      today_date.getMonth() +
+      "then day" +
+      today_date.getDate()
+  );
+  chrome.storage.sync.get(["curr_year", "curr_month", "curr_date"], function(
+    result
   ) {
-    /*
-    MISSING: if decided to add storing feature, include the storage of current time into database here 
-    */
-    var storage_key =
-      today_date.getFullYear() + today_date.getMonth() + today_date.getDate();
+    console.log("currr yr" + result.curr_date);
+    console.log("currr mnth" + result.curr_month);
+    console.log("currr mndayth" + result.curr_year);
 
-    var storage_time = {
-      hr: local_hr,
-      min: local_min,
-      sec: local_sec
-    };
-    chrome.storage.sync.set({
-      timer_db: { storage_key: storage_time }
-    });
-    // they all dont match thus it is the first time being opened today
-    local_hr = 0;
-    local_min = 0;
-    local_sec = 0;
-    local_btn_text = "START";
-    chrome.storage.sync.set({
+    if (
+      !(
+        today_date.getDate() == result.curr_date &&
+        today_date.getMonth() == result.curr_month &&
+        today_date.getFullYear() == result.curr_year
+      )
+    ) {
+      reset_timer_today(request, sender, today_date);
+    } else {
+      establish_long_connection(request, sender);
+    }
+  });
+}
+
+function reset_timer_today(request, sender, today_date) {
+  console.log("got hereere");
+  var storage_key =
+    "yr:" +
+    today_date.getFullYear() +
+    "month:" +
+    today_date.getMonth() +
+    "date:" +
+    today_date.getDate();
+
+  var storage_time = {
+    hr: local_hr,
+    min: local_min,
+    sec: local_sec
+  };
+
+  // they all dont match thus it is the first time being opened today
+  chrome.storage.sync.set(
+    {
       btn_text: "START",
       timer_hr: 0,
       timer_min: 0,
       timer_sec: 0,
-      current_date: today
-    });
-  }
+      timer_db: { storage_key: storage_time },
+      curr_year: today_date.getFullYear(),
+      curr_month: today_date.getMonth(),
+      curr_date: today_date.getDate()
+    },
+    function() {
+      local_hr = 0;
+      local_min = 0;
+      local_sec = 0;
+      local_btn_text = "START";
+      establish_long_connection(request, sender);
+    }
+  );
 }
