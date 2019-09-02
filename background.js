@@ -1,5 +1,6 @@
 var local_min;
 var local_sec;
+var local_hr;
 var local_btn_text;
 var interval;
 
@@ -9,6 +10,7 @@ function store_initial_timer_values(info) {
     var today = new Date();
     chrome.storage.sync.set({
       btn_text: "START",
+      timer_hr: 0,
       timer_min: 0,
       timer_sec: 0,
       current_date: today
@@ -26,13 +28,17 @@ function establish_long_connection(request, sender) {
     port.postMessage({
       btn_text: local_btn_text,
       timer_min: local_min,
-      timer_sec: local_sec
+      timer_sec: local_sec,
+      timer_hr: local_hr
     });
     port.onMessage.addListener(function(msg) {
       console.log(msg.msg);
     });
     port.onDisconnect.addListener(function() {
       console.log("disconnected");
+      chrome.storage.sync.get("timer_hr", function(result) {
+        console.log(result.timer_hr);
+      });
       chrome.storage.sync.get("timer_min", function(result) {
         console.log(result.timer_min);
       });
@@ -66,11 +72,18 @@ function run_timer() {
   } else {
     local_sec++;
   }
+  if (local_min == 60) {
+    local_hr++;
+    local_min = 0;
+  }
   console.log(local_min, local_sec);
 }
 
 chrome.runtime.onInstalled.addListener(store_initial_timer_values);
 chrome.runtime.onMessage.addListener(establish_long_connection);
+chrome.storage.sync.get("timer_hr", function(result) {
+  local_hr = result.timer_hr;
+});
 chrome.storage.sync.get("timer_min", function(result) {
   local_min = result.timer_min;
 });
@@ -100,11 +113,13 @@ function check_if_new_day() {
     MISSING: if decided to add storing feature, include the storage of current time into database here 
     */
     // they all dont match thus it is the first time being opened today
+    local_hr = 0;
     local_min = 0;
     local_sec = 0;
     local_btn_text = "START";
     chrome.storage.sync.set({
       btn_text: "START",
+      timer_hr: 0,
       timer_min: 0,
       timer_sec: 0,
       current_date: today

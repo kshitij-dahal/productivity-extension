@@ -1,3 +1,4 @@
+var timer_hr_local;
 var timer_min_local;
 var timer_sec_local;
 var timer_state;
@@ -8,6 +9,7 @@ var timer_run_interval;
 function establish_connection(port) {
   port.postMessage({ msg: "hello man" });
   port.onMessage.addListener(function(msg) {
+    timer_hr_local = msg.timer_hr;
     timer_min_local = msg.timer_min;
     timer_sec_local = msg.timer_sec;
     timer_state = msg.btn_text;
@@ -45,12 +47,21 @@ function run_timer() {
   } else {
     timer_sec_local++;
   }
+  if (timer_min_local == 60) {
+    timer_hr_local++;
+    timer_min_local = 0;
+  }
   update_timer_values();
 }
 
 function update_timer_values() {
   var timer_text = document.querySelectorAll("span");
-  var min_text, sec_text;
+  var min_text, sec_text, hr_text;
+  if (timer_hr_local < 10) {
+    hr_text = document.createTextNode("0" + timer_hr_local);
+  } else {
+    hr_text = document.createTextNode(timer_hr_local);
+  }
   if (timer_min_local < 10) {
     min_text = document.createTextNode("0" + timer_min_local);
   } else {
@@ -62,9 +73,11 @@ function update_timer_values() {
     sec_text = document.createTextNode(timer_sec_local);
   }
   timer_text[1].removeChild(timer_text[1].firstChild);
+  timer_text[1].appendChild(hr_text);
   timer_text[3].removeChild(timer_text[3].firstChild);
-  timer_text[1].appendChild(min_text);
-  timer_text[3].appendChild(sec_text);
+  timer_text[3].appendChild(min_text);
+  timer_text[5].removeChild(timer_text[5].firstChild);
+  timer_text[5].appendChild(sec_text);
 }
 
 function configure_timer() {
@@ -94,6 +107,7 @@ function change_btn_text() {
   btn_text.appendChild(new_text_node);
   chrome.storage.sync.set({
     btn_text: btn_text.firstChild.textContent,
+    timer_hr: timer_hr_local,
     timer_min: timer_min_local,
     timer_sec: timer_sec_local
   });
