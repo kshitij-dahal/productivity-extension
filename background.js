@@ -6,6 +6,7 @@ var interval;
 
 // upon first install, store 00:00 for value of timer in the storage
 function store_initial_timer_values(info) {
+  // change this to only checking if it is install before uploading
   if (info.reason == "install" || info.reason == "update") {
     var today = new Date();
     var year = today.getFullYear();
@@ -54,6 +55,8 @@ function establish_long_connection(request, sender) {
   }
 }
 
+// if storage area is changed (aka new values are stored because of button events in popup)
+// update this timer and this button text accordingly
 function configure_timer(changes, namespace) {
   if (changes.hasOwnProperty("btn_text")) {
     if (changes["btn_text"].newValue == "PAUSE") {
@@ -90,22 +93,11 @@ function run_timer() {
   console.log(local_hr, local_min, local_sec);
 }
 
-chrome.runtime.onInstalled.addListener(store_initial_timer_values);
-chrome.runtime.onMessage.addListener(check_if_new_day);
-chrome.storage.sync.get("timer_hr", function(result) {
-  local_hr = result.timer_hr;
-});
-chrome.storage.sync.get("timer_min", function(result) {
-  local_min = result.timer_min;
-});
-chrome.storage.sync.get("timer_sec", function(result) {
-  local_sec = result.timer_sec;
-});
-chrome.storage.sync.get("btn_text", function(result) {
-  local_btn_text = result.btn_text;
-});
-chrome.storage.onChanged.addListener(configure_timer);
-
+// checks if the current day, month and year values in storage are equal to
+// today's date value. If they are equal, then it is not the first time that
+// popup is being opened today, thus simply continue to establish connection
+// and send storage timer values, otherwise, reset timer first and then establish
+// connection and send timer values
 function check_if_new_day(request, sender) {
   var today_date = new Date();
   console.log(
@@ -123,16 +115,15 @@ function check_if_new_day(request, sender) {
     console.log("currr mnth" + result.curr_month);
     console.log("currr mndayth" + result.curr_year);
 
-    if (
-      !(
-        today_date.getDate() == result.curr_date &&
-        today_date.getMonth() == result.curr_month &&
-        today_date.getFullYear() == result.curr_year
-      )
-    ) {
-      reset_timer_today(request, sender, today_date);
-    } else {
+    var date_values_equal =
+      today_date.getDate() == result.curr_date &&
+      today_date.getMonth() == result.curr_month &&
+      today_date.getFullYear() == result.curr_year;
+
+    if (date_values_equal) {
       establish_long_connection(request, sender);
+    } else {
+      reset_timer_today(request, sender, today_date);
     }
   });
 }
@@ -160,7 +151,7 @@ function reset_timer_today(request, sender, today_date) {
       timer_hr: 0,
       timer_min: 0,
       timer_sec: 0,
-      timer_db: { storage_key: storage_time },
+      timer_db: { [storage_key]: storage_time },
       curr_year: today_date.getFullYear(),
       curr_month: today_date.getMonth(),
       curr_date: today_date.getDate()
@@ -174,3 +165,16 @@ function reset_timer_today(request, sender, today_date) {
     }
   );
 }
+
+chrome.runtime.onInstalled.addListener(store_initial_timer_values);
+chrome.runtime.onMessage.addListener(check_if_new_day);
+chrome.storage.sync.get(
+  ["timer_hr", "timer_min", "timer_sec", "btn_text"],
+  function(result) {
+    local_hr = result.timer_hr;
+    local_min = result.timer_min;
+    local_sec = result.timer_sec;
+    local_btn_text = result.btn_text;
+  }
+);
+chrome.storage.onChanged.addListener(configure_timer);

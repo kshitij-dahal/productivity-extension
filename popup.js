@@ -22,11 +22,13 @@ function establish_connection(port) {
         ":" +
         timer_sec_local
     );
-    update_timer_values(); // update the min and secfrom storage
-    set_initial_btn_text();
+    update_timer_values(); // update the timer values showin in popup.html according to local values
+    set_initial_btn_text(); // update the text in the button in popup.html and run/stop timer if required
   });
 }
 
+// Based on the local timer state value, set the html button text and configure the
+// displayed timer accordingly
 function set_initial_btn_text() {
   if (timer_state != "START") {
     if (timer_state == "PAUSE") {
@@ -54,24 +56,25 @@ function run_timer() {
   update_timer_values();
 }
 
+// returns a formatted text node based on whether the values of timer_val is
+// less than 10 in order to make it two digits
+function return_formatted_timer_text_node(timer_val) {
+  if (timer_val < 10) {
+    return document.createTextNode("0" + timer_val);
+  } else {
+    return document.createTextNode(timer_val);
+  }
+}
+
+// update timer values in popup.html
 function update_timer_values() {
   var timer_text = document.querySelectorAll("span");
   var min_text, sec_text, hr_text;
-  if (timer_hr_local < 10) {
-    hr_text = document.createTextNode("0" + timer_hr_local);
-  } else {
-    hr_text = document.createTextNode(timer_hr_local);
-  }
-  if (timer_min_local < 10) {
-    min_text = document.createTextNode("0" + timer_min_local);
-  } else {
-    min_text = document.createTextNode(timer_min_local);
-  }
-  if (timer_sec_local < 10) {
-    sec_text = document.createTextNode("0" + timer_sec_local);
-  } else {
-    sec_text = document.createTextNode(timer_sec_local);
-  }
+
+  hr_text = return_formatted_timer_text_node(timer_hr_local);
+  min_text = return_formatted_timer_text_node(timer_min_local);
+  sec_text = return_formatted_timer_text_node(timer_sec_local);
+
   timer_text[1].removeChild(timer_text[1].firstChild);
   timer_text[1].appendChild(hr_text);
   timer_text[3].removeChild(timer_text[3].firstChild);
@@ -80,6 +83,7 @@ function update_timer_values() {
   timer_text[5].appendChild(sec_text);
 }
 
+// run timer if timer state is pause or if it is continue, then stop the timer
 function configure_timer() {
   if (timer_state == "PAUSE") {
     timer_run_interval = setInterval(run_timer, 1000);
