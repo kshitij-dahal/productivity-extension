@@ -7,17 +7,3 @@ function return_formatted_timer_text_node(timer_val) {
     return document.createTextNode(timer_val);
   }
 }
-// update timer and then show current timer values on popup.html
-function run_timer() {
-  if (timer_sec_local == 59) {
-    timer_min_local++;
-    timer_sec_local = 0;
-  } else {
-    timer_sec_local++;
-  }
-  if (timer_min_local == 60) {
-    timer_hr_local++;
-    timer_min_local = 0;
-  }
-  update_timer_values(timer_hr_local, timer_min_local, timer_sec_local);
-}

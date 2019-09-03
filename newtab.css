@@ -1,12 +1,13 @@
 /* START: design timer text */
 #timer_container {
   font-weight: 500;
-  color: green;
+  color: red;
   font-size: 27px;
   font-family: "Courier New", Arial, Helvetica, sans-serif;
   float: left;
   margin-left: 70px;
   margin-top: 20px;
+  visibility: hidden;
 }
 
 #settings_btn,

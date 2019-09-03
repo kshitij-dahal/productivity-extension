@@ -18,7 +18,7 @@ function store_initial_timer_values(info) {
     local_min = 0;
     local_sec = 0;
     local_hr = 0;
-    local_pomodoro = 1;
+    local_pomodoro = 5;
     local_btn_text = "START";
     chrome.storage.sync.set(
       {
@@ -48,6 +48,7 @@ function establish_long_connection(request, sender) {
   if (request.msg == "popup_open") {
     var popup_port = chrome.runtime.connect({ name: "timer_request" });
     popup_port.postMessage({
+      id: "bg",
       btn_text: local_btn_text,
       timer_min: local_min,
       timer_sec: local_sec,
@@ -72,6 +73,7 @@ function establish_long_connection(request, sender) {
   } else if (request.msg == "newtab_open") {
     newtab_port = chrome.runtime.connect({ name: "timer_request" });
     newtab_port.postMessage({
+      id: "bg",
       timer_min: local_min,
       timer_hr: local_hr
     });
@@ -115,20 +117,19 @@ function send_pomodoro_notif() {
 function run_timer() {
   if (local_sec == 59) {
     local_min++;
-    if (
-      (parseFloat(local_min) + parseFloat(local_hr) * 60) %
-        parseFloat(local_pomodoro) ==
-      0
-    ) {
+    if ((local_min + local_hr * 60) % local_pomodoro == 0) {
       send_pomodoro_notif();
     }
     local_sec = 0;
+  } else {
+    local_sec++;
+  }
+  if (local_sec == 0) {
     newtab_port.postMessage({
+      id: "bg",
       timer_min: local_min,
       timer_hr: local_hr
     });
-  } else {
-    local_sec++;
   }
   if (local_min == 60) {
     local_hr++;
@@ -162,9 +163,9 @@ function check_if_new_day(request, sender) {
     console.log("currr mndayth" + result.curr_year);
 
     var date_values_equal =
-      today_date.getDate() == result.curr_date &&
-      today_date.getMonth() == result.curr_month &&
-      today_date.getFullYear() == result.curr_year;
+      parseInt(today_date.getDate()) == parseInt(result.curr_date) &&
+      parseInt(today_date.getMonth()) == parseInt(result.curr_month) &&
+      parseInt(today_date.getFullYear()) == parseInt(result.curr_year);
 
     if (date_values_equal) {
       establish_long_connection(request, sender);
