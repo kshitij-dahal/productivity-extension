@@ -2,8 +2,10 @@ var local_min;
 var local_sec;
 var local_hr;
 var local_btn_text;
+var local_pomodoro;
 var interval;
 var initial = false;
+var newtab_port;
 
 // upon first install, store 00:00 for value of timer in the storage
 function store_initial_timer_values(info) {
@@ -16,6 +18,7 @@ function store_initial_timer_values(info) {
     local_min = 0;
     local_sec = 0;
     local_hr = 0;
+    local_pomodoro = 1;
     local_btn_text = "START";
     chrome.storage.sync.set(
       {
@@ -26,7 +29,8 @@ function store_initial_timer_values(info) {
         curr_year: year,
         curr_month: month,
         curr_date: day,
-        goal: -1
+        goal: -1,
+        pomodoro: 1
       },
       function() {
         console.log("stored it");
@@ -65,7 +69,12 @@ function establish_long_connection(request, sender) {
         }
       );
     });
-  } else if ((request.msg = "newtab_open")) {
+  } else if (request.msg == "newtab_open") {
+    newtab_port = chrome.runtime.connect({ name: "timer_request" });
+    newtab_port.postMessage({
+      timer_min: local_min,
+      timer_hr: local_hr
+    });
   }
 }
 
@@ -92,11 +101,32 @@ function configure_timer(changes, namespace) {
   }
 }
 
+function send_pomodoro_notif() {
+  console.log("gotemmm ehehehehheehehh");
+  chrome.notifications.create({
+    type: "basic",
+    iconUrl: "icon.png",
+    title: "Timer",
+    message: "1 session complete"
+  });
+}
+
 // update local timer values
 function run_timer() {
   if (local_sec == 59) {
     local_min++;
+    if (
+      (parseFloat(local_min) + parseFloat(local_hr) * 60) %
+        parseFloat(local_pomodoro) ==
+      0
+    ) {
+      send_pomodoro_notif();
+    }
     local_sec = 0;
+    newtab_port.postMessage({
+      timer_min: local_min,
+      timer_hr: local_hr
+    });
   } else {
     local_sec++;
   }
@@ -105,6 +135,8 @@ function run_timer() {
     local_min = 0;
   }
   console.log(local_hr, local_min, local_sec);
+
+  console.log("this is local pomodoro" + local_pomodoro);
 }
 
 // checks if the current day, month and year values in storage are equal to
@@ -183,12 +215,13 @@ function reset_timer_today(request, sender, today_date) {
 chrome.runtime.onInstalled.addListener(store_initial_timer_values);
 
 chrome.storage.sync.get(
-  ["timer_hr", "timer_min", "timer_sec", "btn_text"],
+  ["timer_hr", "timer_min", "timer_sec", "btn_text", "pomodoro"],
   function(result) {
     local_hr = result.timer_hr;
     local_min = result.timer_min;
     local_sec = result.timer_sec;
     local_btn_text = result.btn_text;
+    local_pomodoro = result.pomodoro;
     console.log("gotem " + local_btn_text);
     chrome.runtime.onMessage.addListener(check_if_new_day);
   }
