@@ -9,31 +9,49 @@
     <script src="shared.js"></script>
   </head>
   <body>
-    <section id="setup">
-      <div id="timer_container">
-        Remaining:
-        <span id="hr_val_rem">00</span>
-        <span>h</span>
-        <span id="min_val_rem">00</span>
-        <span>m</span>
+    <div id="underlay">
+      <section id="setup">
+        <div id="timer_container">
+          Remaining:
+          <span id="hr_val_rem">00</span>
+          <span>h</span>
+          <span id="min_val_rem">00</span>
+          <span>m</span>
+        </div>
+        <div>
+          <button id="settings_btn">Settings</button>
+        </div>
+        <div id="goal_setup">
+          <form>
+            GOAL:
+            <input
+              id="goal_input"
+              type="text"
+              name="daily_goal"
+              autocomplete="off"
+            />h
+          </form>
+        </div>
+      </section>
+      <section id="data_view"></section>
+    </div>
+    <div id="options_overlay">
+      <div>
+        Settings
       </div>
       <div>
-        <button id="settings_btn">
-          <a href="/options.html">Settings</a>
-        </button>
+        <span id="pomodoro_option"
+          >Pomodoro Mode: <span id="chosen_pomodoro_option"></span
+        ></span>
+        Interval: <span id="pomodoro_value"></span> min
       </div>
-      <div id="goal_setup">
-        <form>
-          GOAL:
-          <input
-            id="goal_input"
-            type="text"
-            name="daily_goal"
-            autocomplete="off"
-          />h
-        </form>
+
+      <div>
+        <button>Clear Data</button>
       </div>
-    </section>
-    <section id="data_view"></section>
+      <div>
+        <button id="quit_btn">Quit</button>
+      </div>
+    </div>
   </body>
 </html>

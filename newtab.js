@@ -134,6 +134,58 @@ document.addEventListener("DOMContentLoaded", function(event) {
       }
     });
   }
+  document.querySelector("button").addEventListener("click", function(event) {
+    document.querySelector("#options_overlay").style.display = "block";
+  });
+  document
+    .querySelector("#quit_btn")
+    .addEventListener("click", function(event) {
+      alert("gay");
+      document.querySelector("#options_overlay").style.display = "none";
+    });
+
+  chrome.storage.sync.get("pomodoro", function(result) {
+    var pomodoro_value;
+    var html_pomodoro_option_text;
+    var temp_pomodoro_option;
+
+    pomodoro_value = result.pomodoro;
+    console.log(parseInt(pomodoro_value) > 0);
+
+    temp_pomodoro_option = pomodoro_value;
+
+    if (parseInt(pomodoro_value) > 0) {
+      html_pomodoro_option_text = "ON";
+    } else {
+      html_pomodoro_option_text = "OFF";
+    }
+
+    console.log(html_pomodoro_option_text);
+
+    var pomodoro_on_or_off = document.querySelector("#chosen_pomodoro_option");
+
+    var pomodoro_option = document.createTextNode(html_pomodoro_option_text);
+    if (pomodoro_on_or_off.firstChild) {
+      pomodoro_on_or_off.removeChild(pomodoro_on_or_off.firstChild);
+    }
+    pomodoro_on_or_off.appendChild(pomodoro_option);
+
+    document
+      .querySelector("#pomodoro_option")
+      .addEventListener("click", function(event) {
+        pomodoro_on_or_off.removeChild(pomodoro_on_or_off.firstChild);
+        temp_pomodoro_option *= -1;
+        if (temp_pomodoro_option > 0) {
+          pomodoro_on_or_off.appendChild(document.createTextNode("ON"));
+        } else {
+          pomodoro_on_or_off.appendChild(document.createTextNode("OFF"));
+        }
+      });
+
+    document
+      .querySelector("#pomodoro_value")
+      .appendChild(document.createTextNode(pomodoro_value));
+  });
 
   chrome.runtime.sendMessage({ msg: "newtab_open" });
   chrome.runtime.onConnect.addListener(establish_connection);
