@@ -75,12 +75,6 @@ input:disabled {
   font-family: "Courier New", Arial, Helvetica, sans-serif;
 }
 
-#pomodoro_option {
-  margin-right: 150px;
-}
-
-#underlay {
-  /*filter: blur(2px);*/
-  /*height: 100px;*/
-  /* background-color: #ccc;*/
+#interval {
+  float: right;
 }

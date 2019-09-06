@@ -137,17 +137,19 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document.querySelector("button").addEventListener("click", function(event) {
     document.querySelector("#options_overlay").style.display = "block";
   });
+  var temp_pomodoro_option;
+
   document
     .querySelector("#quit_btn")
     .addEventListener("click", function(event) {
-      alert("gay");
-      document.querySelector("#options_overlay").style.display = "none";
+      chrome.storage.sync.set({ pomodoro: temp_pomodoro_option }, function() {
+        document.querySelector("#options_overlay").style.display = "none";
+      });
     });
 
   chrome.storage.sync.get("pomodoro", function(result) {
     var pomodoro_value;
     var html_pomodoro_option_text;
-    var temp_pomodoro_option;
 
     pomodoro_value = result.pomodoro;
     console.log(parseInt(pomodoro_value) > 0);
@@ -156,8 +158,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
     if (parseInt(pomodoro_value) > 0) {
       html_pomodoro_option_text = "ON";
+      document.querySelector("#pomodoro_value").disabled = false;
     } else {
       html_pomodoro_option_text = "OFF";
+      document.querySelector("#pomodoro_value").disabled = true;
     }
 
     console.log(html_pomodoro_option_text);
@@ -177,8 +181,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
         temp_pomodoro_option *= -1;
         if (temp_pomodoro_option > 0) {
           pomodoro_on_or_off.appendChild(document.createTextNode("ON"));
+          document.querySelector("#pomodoro_value").disabled = false;
         } else {
           pomodoro_on_or_off.appendChild(document.createTextNode("OFF"));
+          document.querySelector("#pomodoro_value").disabled = true;
         }
       });
 
