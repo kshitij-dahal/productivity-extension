@@ -177,13 +177,15 @@ function check_if_new_day(request, sender) {
 
 function reset_timer_today(request, sender, today_date) {
   console.log("got hereere");
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
   var storage_key =
     "yr:" +
-    today_date.getFullYear() +
+    yesterday.getFullYear() +
     "month:" +
-    today_date.getMonth() +
+    yesterday.getMonth() +
     "date:" +
-    today_date.getDate();
+    yesterday.getDate();
 
   var storage_time = {
     hr: local_hr,
@@ -201,7 +203,8 @@ function reset_timer_today(request, sender, today_date) {
       timer_db: { [storage_key]: storage_time },
       curr_year: today_date.getFullYear(),
       curr_month: today_date.getMonth(),
-      curr_date: today_date.getDate()
+      curr_date: today_date.getDate(),
+      goal: -1
     },
     function() {
       local_hr = 0;
