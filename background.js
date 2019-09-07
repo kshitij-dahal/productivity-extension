@@ -72,10 +72,14 @@ function establish_long_connection(request, sender) {
     });
   } else if (request.msg == "newtab_open") {
     newtab_port = chrome.runtime.connect({ name: "timer_request" });
-    newtab_port.postMessage({
-      id: "bg",
-      timer_min: local_min,
-      timer_hr: local_hr
+    chrome.storage.sync.get("pomodoro", function(result) {
+      local_pomodoro = result.pomodoro;
+      newtab_port.postMessage({
+        id: "bg",
+        timer_min: local_min,
+        timer_hr: local_hr,
+        pomodoro: local_pomodoro
+      });
     });
   }
 }
@@ -128,7 +132,8 @@ function run_timer() {
     newtab_port.postMessage({
       id: "bg",
       timer_min: local_min,
-      timer_hr: local_hr
+      timer_hr: local_hr,
+      pomodoro: local_pomodoro
     });
   }
   if (local_min == 60) {
