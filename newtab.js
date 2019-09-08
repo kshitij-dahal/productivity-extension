@@ -14,43 +14,48 @@ document.addEventListener("DOMContentLoaded", function(event) {
   // check if goal is set, if not set it
   // then show remaining time
   var goal = document.querySelector("#goal_input");
-  chrome.storage.sync.get("goal", function(result) {
-    if (result.goal != -1) {
-      // goal already set
-      goal.value = result.goal;
-      goal.setAttribute("disabled", "true");
-      timer_goal = result.goal;
-      remaining_time = parseFloat(timer_goal) * 60;
-      document.querySelector("#timer_container").style.visibility = "visible";
-    } else {
-      goal.addEventListener("keydown", function(event) {
-        if (event.keyCode === 13) {
-          event.preventDefault();
-          var text = goal.value;
-          goal.setAttribute("disabled", "true");
-          chrome.storage.sync.set({ goal: text }, function() {
-            remaining_time = Math.round(parseFloat(text) * 60);
-            console.log(
-              "remaining_time is hhere " +
-                remaining_time +
-                "and hr" +
-                parseInt(remaining_time / 60) +
-                "and min" +
-                (remaining_time % 60)
-            );
-            timer_goal = text;
-            update_timer_values(
-              parseInt(parseInt(remaining_time / 60)),
-              parseInt(remaining_time % 60)
-            );
-            document.querySelector("#timer_container").style.visibility =
-              "visible";
-          });
-        }
-      });
-    }
-  });
 
+  function goal_setting() {
+    chrome.storage.sync.get("goal", function(result) {
+      timer_goal = result.goal;
+      if (result.goal != -1) {
+        // goal already set
+        goal.value = result.goal;
+        goal.setAttribute("disabled", "true");
+        timer_goal = result.goal;
+        remaining_time = parseFloat(timer_goal) * 60;
+        document.querySelector("#timer_container").style.visibility = "visible";
+      } else {
+        goal.addEventListener("keydown", function(event) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            var text = goal.value;
+            goal.setAttribute("disabled", "true");
+            chrome.storage.sync.set({ goal: text }, function() {
+              remaining_time = Math.round(parseFloat(text) * 60);
+              console.log(
+                "remaining_time is hhere " +
+                  remaining_time +
+                  "and hr" +
+                  parseInt(remaining_time / 60) +
+                  "and min" +
+                  (remaining_time % 60)
+              );
+              timer_goal = text;
+              update_timer_values(
+                parseInt(parseInt(remaining_time / 60)),
+                parseInt(remaining_time % 60)
+              );
+              document.querySelector("#timer_container").style.visibility =
+                "visible";
+            });
+          }
+        });
+      }
+    });
+  }
+
+  goal_setting();
   // update timer values in popup.html
   function update_timer_values(hr_local, min_local) {
     var hr_element = document.querySelector("#hr_val_rem");
@@ -100,6 +105,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         ",0)");
   }
 
+  var goal_accomplished_interval;
+  var number_of_flashes = 0;
   // indicate to background.js that popup.html has opened and receive current timer values
   // then begin timer
   function establish_connection(port) {
@@ -126,6 +133,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
           console.log("rem hr" + remaining_hr);
           console.log("rem min" + remaining_min);
 
+          update_timer_values(remaining_hr, remaining_min);
+          update_pomodoro_value();
+
           if (remaining_hr == 0 && remaining_min == 0) {
             chrome.notifications.create({
               type: "basic",
@@ -133,13 +143,35 @@ document.addEventListener("DOMContentLoaded", function(event) {
               title: "Well Done",
               message: "Today's Goal Accomplished"
             });
+            if (number_of_flashes == 0) {
+              timer_goal = -1;
+              chrome.storage.sync.set({ goal: -1 }, function() {
+                for (var x = 0; x < 11; x++) window.setTimeout(flash, 1000 * x);
+
+                number_of_flashes++;
+              });
+              goal.removeAttribute("disabled");
+              goal.value = "";
+              console.log("haha" + goal.disabled);
+            }
           }
-          update_timer_values(remaining_hr, remaining_min);
-          update_pomodoro_value();
+
           console.log(parseInt(remaining_time / 60));
         });
       }
     });
+  }
+
+  function flash() {
+    console.log(number_of_flashes + "<-num of flashes");
+    if (number_of_flashes == 6) clearInterval(goal_accomplished_interval);
+    if (
+      document.querySelector("#timer_container").style.visibility == "visible"
+    ) {
+      document.querySelector("#timer_container").style.visibility = "hidden";
+    } else {
+      document.querySelector("#timer_container").style.visibility = "visible";
+    }
   }
 
   function update_pomodoro_value() {
@@ -169,12 +201,15 @@ document.addEventListener("DOMContentLoaded", function(event) {
     pomodoro_on_or_off.appendChild(pomodoro_option);
   }
 
-  document.querySelector("button").addEventListener("click", function(event) {
-    chrome.storage.sync.get("pomodoro", function(result) {
-      temp_pomodoro_option = result.pomodoro;
-      document.querySelector("#options_overlay").style.display = "block";
+  if (timer_goal == null || timer_goal == -1) {
+    document.querySelector("button").addEventListener("click", function(event) {
+      chrome.storage.sync.get("pomodoro", function(result) {
+        temp_pomodoro_option = result.pomodoro;
+
+        document.querySelector("#options_overlay").style.display = "block";
+      });
     });
-  });
+  }
 
   document
     .querySelector("#quit_btn")
@@ -184,7 +219,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
           ? document.querySelector("#pomodoro_value").value
           : -1 * document.querySelector("#pomodoro_value").value;
       chrome.storage.sync.set({ pomodoro: temp_pomodoro_option }, function() {
-        alert("new pom value" + temp_pomodoro_option);
         document.querySelector("#options_overlay").style.display = "none";
       });
     });

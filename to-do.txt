@@ -11,6 +11,10 @@ v1
 - add pomodoro mode
 - add calendar streak view
 - add calendar time view
+- bugs: set 1h goal and remaining time shows 59 min
+- make pomodoro mode work if it is on (aka not show notifs) x
+- after goal is reached, change the flashing message
+- after goal is finished, time remaining acts wierd if timer continues
 
 v2
 - give user the option to view graph 

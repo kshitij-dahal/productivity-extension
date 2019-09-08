@@ -105,6 +105,13 @@ function configure_timer(changes, namespace) {
   if (changes.hasOwnProperty("timer_sec")) {
     local_sec = changes["timer_sec"].newValue;
   }
+  configure_pomodoro(changes);
+}
+
+function configure_pomodoro(changes) {
+  if (changes.hasOwnProperty("pomodoro")) {
+    local_pomodoro = changes["pomodoro"].newValue;
+  }
 }
 
 function send_pomodoro_notif() {
@@ -121,7 +128,10 @@ function send_pomodoro_notif() {
 function run_timer() {
   if (local_sec == 59) {
     local_min++;
-    if ((local_min + local_hr * 60) % local_pomodoro == 0) {
+    if (
+      local_pomodoro > 0 &&
+      (local_min + local_hr * 60) % local_pomodoro == 0
+    ) {
       send_pomodoro_notif();
     }
     local_sec = 0;
