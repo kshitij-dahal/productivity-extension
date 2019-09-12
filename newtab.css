@@ -4,10 +4,13 @@
   color: red;
   font-size: 27px;
   font-family: "Courier New", Arial, Helvetica, sans-serif;
-  float: left;
+  /*float: left;*/
   margin-left: 70px;
   margin-top: 20px;
   visibility: hidden;
+  top: 0;
+  left: 0;
+  position: absolute;
 }
 
 /*
@@ -59,17 +62,8 @@ input:disabled {
   color: green;
 }
 
-#options_overlay {
-  position: fixed; /* Sit on top of the page content */
-  display: none; /* Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgb(255, 255, 255); /* Black background with opacity */
-  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
+#pomodoro_option,
+#interval {
   cursor: pointer; /* Add a pointer on hover */
   font-weight: 500;
   color: darkgreen;
@@ -77,6 +71,21 @@ input:disabled {
   font-family: "Courier New", Arial, Helvetica, sans-serif;
 }
 
+#pomodoro_option {
+  display: block;
+  margin-left: 70px;
+  margin-top: 20px;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+
 #interval {
-  float: right;
+  display: block;
+  float: left;
+  margin-right: 70px;
+  margin-top: 20px;
+  top: 0;
+  right: 0;
+  position: absolute;
 }

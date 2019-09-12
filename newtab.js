@@ -11,6 +11,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
   );
   var goal = document.querySelector("#goal_input");
   var total_remaining_time_element = document.querySelector("#timer_container");
+  var pomodoro_interval_element = document.querySelector("#interval");
+  var pomodoro_option_element = document.querySelector("#pomodoro_option");
 
   // check if goal is set, if not set it
   // then show remaining time
@@ -24,6 +26,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         timer_goal = result.goal;
         remaining_time = parseFloat(timer_goal) * 60;
         total_remaining_time_element.style.visibility = "visible";
+        pomodoro_interval_element.style.visibility = "hidden";
+        pomodoro_option_element.style.visibility = "hidden";
       } else {
         // wait for enter key being pressed
         goal.addEventListener("keydown", function(event) {
@@ -47,6 +51,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
                 parseInt(remaining_time % 60)
               );
               total_remaining_time_element.style.visibility = "visible";
+              pomodoro_interval_element.style.visibility = "hidden";
+              pomodoro_option_element.style.visibility = "hidden";
             });
           }
         });
@@ -148,6 +154,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
               });
               goal.removeAttribute("disabled");
               goal.value = "";
+              window.setTimeout(flash, 10000, function() {
+                pomodoro_interval_element.style.visibility = "visible";
+                pomodoro_option_element.style.visibility = "visible";
+              });
               console.log("haha" + goal.disabled);
             }
           }
@@ -159,7 +169,6 @@ document.addEventListener("DOMContentLoaded", function(event) {
   // switch the visibility of the remaining time display
   function flash() {
     console.log(number_of_flashes + "<-num of flashes");
-    if (number_of_flashes == 6) clearInterval(goal_accomplished_interval);
     if (total_remaining_time_element.style.visibility == "visible") {
       total_remaining_time_element.style.visibility = "hidden";
     } else {
