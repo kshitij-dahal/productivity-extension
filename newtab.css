@@ -10,6 +10,7 @@
   visibility: hidden;
 }
 
+/*
 #settings_btn,
 #settings_btn:focus {
   border: none;
@@ -30,6 +31,7 @@
 #settings_btn:hover {
   border: rgba(226, 226, 226, 0) solid 3px;
 }
+*/
 
 #goal_setup {
   margin: 0 auto;

@@ -19,7 +19,19 @@
           <span>m</span>
         </div>
         <div>
-          <button id="settings_btn">Settings</button>
+          <span id="pomodoro_option"
+            >Pomodoro Mode: <span id="chosen_pomodoro_option"></span
+          ></span>
+        </div>
+        <div id="interval">
+          Interval:
+          <input
+            id="pomodoro_value"
+            type="text"
+            name="pomodoro_value"
+            autocomplete="off"
+          />
+          min
         </div>
         <div id="goal_setup">
           <form>
@@ -34,32 +46,6 @@
         </div>
       </section>
       <section id="data_view"></section>
-    </div>
-    <div id="options_overlay">
-      <div>
-        Settings
-      </div>
-      <div>
-        <span id="pomodoro_option"
-          >Pomodoro Mode: <span id="chosen_pomodoro_option"></span
-        ></span>
-      </div>
-      <div id="interval">
-        Interval:
-        <input
-          id="pomodoro_value"
-          type="text"
-          name="pomodoro_value"
-          autocomplete="off"
-        />
-        min
-      </div>
-      <div>
-        <button>Clear Data</button>
-      </div>
-      <div>
-        <button id="quit_btn">Quit</button>
-      </div>
     </div>
   </body>
 </html>

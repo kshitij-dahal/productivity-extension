@@ -198,16 +198,18 @@ document.addEventListener("DOMContentLoaded", function(event) {
   }
 
   // only allow settings overlay to be accessed if goal is not set
+  /*
   document.querySelector("button").addEventListener("click", function(event) {
     if (timer_goal == null || timer_goal == -1) {
       chrome.storage.sync.get("pomodoro", function(result) {
         temp_pomodoro_option = result.pomodoro;
-        document.querySelector("#options_overlay").style.display = "block";
+        //  document.querySelector("#options_overlay").style.display = "block";
       });
     }
   });
+  */
 
-  // save pom info when settings is quit
+  /* // save pom info when settings is quit
   document
     .querySelector("#quit_btn")
     .addEventListener("click", function(event) {
@@ -219,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
         document.querySelector("#options_overlay").style.display = "none";
       });
     });
+    */
 
   // if pom on or off is clicked, toggle its value and temp save the option
   document
