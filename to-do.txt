@@ -15,6 +15,8 @@ v1
 - make pomodoro mode work if it is on (aka not show notifs) x
 - after goal is reached, change the flashing message
 - after goal is finished, time remaining acts wierd if timer continues
+- goal can only be set once per day so add new storage value: (stored value so far), think about timer running 
+without goal being set
 
 v2
 - give user the option to view graph 

@@ -146,20 +146,23 @@ document.addEventListener("DOMContentLoaded", function(event) {
               title: "Well Done",
               message: "Today's Goal Accomplished"
             });
-            if (number_of_flashes == 0) {
-              timer_goal = -1;
-              chrome.storage.sync.set({ goal: -1 }, function() {
-                for (var x = 0; x < 11; x++) window.setTimeout(flash, 1000 * x);
-                number_of_flashes++;
-              });
-              goal.removeAttribute("disabled");
-              goal.value = "";
-              window.setTimeout(flash, 10000, function() {
-                pomodoro_interval_element.style.visibility = "visible";
-                pomodoro_option_element.style.visibility = "visible";
-              });
-              console.log("haha" + goal.disabled);
-            }
+            // check if newtab open and then click button to pause
+            chrome.runtime.sendMessage({ msg: "update_newtab" });
+            chrome.storage.sync.set({ btn_text: "CONTINUE" }, function() {
+              if (number_of_flashes == 0) {
+                timer_goal = -1;
+                chrome.storage.sync.set({ goal: -1 }, function() {
+                  // for (var x = 0; x < 11; x++) window.setTimeout(flash, 1000 * x);
+                  number_of_flashes++;
+                  goal.removeAttribute("disabled");
+                  goal.value = "";
+                  flash();
+                  pomodoro_interval_element.style.visibility = "visible";
+                  pomodoro_option_element.style.visibility = "visible";
+                  console.log("haha" + goal.disabled);
+                });
+              }
+            });
           }
         });
       }

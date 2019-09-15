@@ -26,6 +26,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
         );
         update_timer_values(timer_hr_local, timer_min_local, timer_sec_local); // update the timer values showin in popup.html according to local values
         set_initial_btn_text(); // update the text in the button in popup.html and run/stop timer if required
+      } else if (msg.msg == "stop_timer") {
+        document.querySelector("button").click();
       }
     });
   }

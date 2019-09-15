@@ -30,7 +30,7 @@ function store_initial_timer_values(info) {
         curr_month: month,
         curr_date: day,
         goal: -1,
-        pomodoro: 1
+        pomodoro: -1
       },
       function() {
         console.log("stored it");
@@ -45,8 +45,9 @@ function store_initial_timer_values(info) {
 // open a long-lived channel to popup.js and send current timer value,
 // then start the timer
 function establish_long_connection(request, sender) {
+  var popup_port;
   if (request.msg == "popup_open") {
-    var popup_port = chrome.runtime.connect({ name: "timer_request" });
+    popup_port = chrome.runtime.connect({ name: "timer_request" });
     popup_port.postMessage({
       id: "bg",
       btn_text: local_btn_text,
@@ -81,6 +82,10 @@ function establish_long_connection(request, sender) {
         pomodoro: local_pomodoro
       });
     });
+  } else if (request.msg == "update_newtab") {
+    if (popup_port != null) {
+      popup_port.postMessage({ msg: "stop_timer" });
+    }
   }
 }
 
