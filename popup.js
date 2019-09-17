@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   // run timer if timer state is pause or if it is continue, then stop the timer
   function configure_timer() {
     if (timer_state == "PAUSE") {
-      timer_run_interval = setInterval(run_timer, 1000);
+      timer_run_interval = setInterval(run_timer, 100);
     } else if (timer_state == "CONTINUE") {
       clearInterval(timer_run_interval);
     }

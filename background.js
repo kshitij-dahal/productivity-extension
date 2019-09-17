@@ -6,6 +6,7 @@ var local_pomodoro;
 var interval;
 var initial = false;
 var newtab_port;
+var time_so_far;
 
 // upon first install, store 00:00 for value of timer in the storage
 function store_initial_timer_values(info) {
@@ -73,6 +74,7 @@ function establish_long_connection(request, sender) {
     });
   } else if (request.msg == "newtab_open") {
     newtab_port = chrome.runtime.connect({ name: "timer_request" });
+    console.log("received msg");
     chrome.storage.sync.get("pomodoro", function(result) {
       local_pomodoro = result.pomodoro;
       newtab_port.postMessage({
@@ -94,7 +96,7 @@ function establish_long_connection(request, sender) {
 function configure_timer(changes, namespace) {
   if (changes.hasOwnProperty("btn_text")) {
     if (changes["btn_text"].newValue == "PAUSE") {
-      interval = setInterval(run_timer, 1000);
+      interval = setInterval(run_timer, 100);
       local_btn_text = "PAUSE";
     } else if (changes["btn_text"].newValue == "CONTINUE") {
       clearInterval(interval);
@@ -236,6 +238,21 @@ function reset_timer_today(request, sender, today_date) {
   );
 }
 
+function message_sent(request, sender) {
+  console.log("got to message sent event listener");
+  if (request.msg == "send_cur_timer_values") {
+    // request sent by newtab to calculate remaining time
+    newtab_port.postMessage({
+      id: "bg_timer_values",
+      timer_min: local_min,
+      timer_hr: local_hr
+    });
+  } else {
+    // request sent by popup or new tab opening
+    check_if_new_day(request, sender);
+  }
+}
+
 chrome.runtime.onInstalled.addListener(store_initial_timer_values);
 
 chrome.storage.sync.get(
@@ -247,7 +264,7 @@ chrome.storage.sync.get(
     local_btn_text = result.btn_text;
     local_pomodoro = result.pomodoro;
     console.log("gotem " + local_btn_text);
-    chrome.runtime.onMessage.addListener(check_if_new_day);
+    chrome.runtime.onMessage.addListener(message_sent);
   }
 );
 chrome.storage.onChanged.addListener(configure_timer);

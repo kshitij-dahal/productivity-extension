@@ -2,8 +2,9 @@
 document.addEventListener("DOMContentLoaded", function(event) {
   // first ask background for timer
   var interval;
+  var time_so_far_min = 0;
   var remaining_time;
-  var timer_goal;
+  var timer_goal = -1;
   var temp_pomodoro_option;
   var html_pomodoro_option_text;
   var pomodoro_on_or_off_element = document.querySelector(
@@ -35,25 +36,30 @@ document.addEventListener("DOMContentLoaded", function(event) {
             event.preventDefault();
             var text = goal.value;
             goal.setAttribute("disabled", "true");
-            chrome.storage.sync.set({ goal: text }, function() {
-              remaining_time = Math.round(parseFloat(text) * 60);
-              console.log(
-                "remaining_time is hhere " +
-                  remaining_time +
-                  "and hr" +
-                  parseInt(remaining_time / 60) +
-                  "and min" +
-                  (remaining_time % 60)
-              );
-              timer_goal = text;
-              update_remaining_time(
-                parseInt(parseInt(remaining_time / 60)),
-                parseInt(remaining_time % 60)
-              );
-              total_remaining_time_element.style.visibility = "visible";
-              pomodoro_interval_element.style.visibility = "hidden";
-              pomodoro_option_element.style.visibility = "hidden";
+            chrome.runtime.onMessage.addListener(function(request, sender) {
+              time_so_far_min = request.timer_min + request.timer_hr * 60;
+              chrome.storage.sync.set({ goal: text }, function() {
+                remaining_time =
+                  Math.round(parseFloat(text) * 60) - time_so_far_min;
+                console.log(
+                  "remaining_time is hhere " +
+                    remaining_time +
+                    "and hr" +
+                    parseInt(remaining_time / 60) +
+                    "and min" +
+                    (remaining_time % 60)
+                );
+                timer_goal = text;
+                update_remaining_time(
+                  parseInt(parseInt(remaining_time / 60)),
+                  parseInt(remaining_time % 60)
+                );
+                total_remaining_time_element.style.visibility = "visible";
+                pomodoro_interval_element.style.visibility = "hidden";
+                pomodoro_option_element.style.visibility = "hidden";
+              });
             });
+            chrome.runtime.sendMessage({ msg: "send_cur_timer_values" });
           }
         });
       }
@@ -122,15 +128,25 @@ document.addEventListener("DOMContentLoaded", function(event) {
         chrome.storage.sync.get("pomodoro", function(result) {
           console.log("time changed" + msg.timer_min + msg.timer_hr);
           console.log(msg);
+          console.log("this is the goal:" + timer_goal);
           temp_pomodoro_option = result.pomodoro;
 
-          var remaining_hr = parseInt(
-            (Math.round(timer_goal * 60) - msg.timer_hr * 60 - msg.timer_min) /
-              60
-          );
+          var remaining_hr =
+            timer_goal == -1
+              ? -1
+              : parseInt(
+                  (Math.round(timer_goal * 60) -
+                    msg.timer_hr * 60 -
+                    msg.timer_min) /
+                    60
+                );
           var remaining_min =
-            (Math.round(timer_goal * 60) - msg.timer_hr * 60 - msg.timer_min) %
-            60;
+            timer_goal == -1
+              ? -1
+              : (Math.round(timer_goal * 60) -
+                  msg.timer_hr * 60 -
+                  msg.timer_min) %
+                60;
 
           console.log("rem hr" + remaining_hr);
           console.log("rem min" + remaining_min);
@@ -146,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
               title: "Well Done",
               message: "Today's Goal Accomplished"
             });
-            // check if newtab open and then click button to pause
+            // check if popup open and then click button to pause
             chrome.runtime.sendMessage({ msg: "update_newtab" });
             chrome.storage.sync.set({ btn_text: "CONTINUE" }, function() {
               if (number_of_flashes == 0) {
@@ -253,6 +269,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     });
 
   // on opening of tab, save the temp pom value
+  console.log("got to hererere");
   document
     .querySelector("#pomodoro_value")
     .appendChild(document.createTextNode(temp_pomodoro_option));
