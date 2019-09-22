@@ -31,7 +31,8 @@ function store_initial_timer_values(info) {
         curr_month: month,
         curr_date: day,
         goal: -1,
-        pomodoro: -1
+        pomodoro: -1,
+        goal_set_timer_values: 0
       },
       function() {
         console.log("stored it");

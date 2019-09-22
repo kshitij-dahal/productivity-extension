@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", function(event) {
   // first ask background for timer
   var interval;
-  var time_so_far_min = 0;
+  var local_goal_set_timer_values = 0;
   var remaining_time;
   var timer_goal = -1;
   var temp_pomodoro_option;
@@ -17,56 +17,42 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
   // check if goal is set, if not set it
   // then show remaining time
-  function update_timer_goal() {
-    chrome.storage.sync.get("goal", function(result) {
+  function update_timer_goal(current_timer_hr, current_timer_min, result) {
+    console.log("herer to update timer goal");
+    console.log("apparently the goal is " + result.goal);
+    timer_goal = result.goal;
+    if (result.goal != -1) {
+      // goal already set
+      goal.value = result.goal;
+      goal.setAttribute("disabled", "true");
       timer_goal = result.goal;
-      if (result.goal != -1) {
-        // goal already set
-        goal.value = result.goal;
-        goal.setAttribute("disabled", "true");
-        timer_goal = result.goal;
-        remaining_time = parseFloat(timer_goal) * 60;
-        total_remaining_time_element.style.visibility = "visible";
-        pomodoro_interval_element.style.visibility = "hidden";
-        pomodoro_option_element.style.visibility = "hidden";
-      } else {
-        // wait for enter key being pressed
-        goal.addEventListener("keydown", function(event) {
-          if (event.keyCode === 13) {
-            event.preventDefault();
-            var text = goal.value;
-            goal.setAttribute("disabled", "true");
-            chrome.runtime.onMessage.addListener(function(request, sender) {
-              time_so_far_min = request.timer_min + request.timer_hr * 60;
-              chrome.storage.sync.set({ goal: text }, function() {
-                remaining_time =
-                  Math.round(parseFloat(text) * 60) - time_so_far_min;
-                console.log(
-                  "remaining_time is hhere " +
-                    remaining_time +
-                    "and hr" +
-                    parseInt(remaining_time / 60) +
-                    "and min" +
-                    (remaining_time % 60)
-                );
-                timer_goal = text;
-                update_remaining_time(
-                  parseInt(parseInt(remaining_time / 60)),
-                  parseInt(remaining_time % 60)
-                );
-                total_remaining_time_element.style.visibility = "visible";
-                pomodoro_interval_element.style.visibility = "hidden";
-                pomodoro_option_element.style.visibility = "hidden";
-              });
-            });
+      remaining_time = Math.round(
+        parseFloat(timer_goal) * 60 -
+          current_timer_hr * 60 -
+          current_timer_min +
+          local_goal_set_timer_values
+      );
+      total_remaining_time_element.style.visibility = "visible";
+      pomodoro_interval_element.style.visibility = "hidden";
+      pomodoro_option_element.style.visibility = "hidden";
+    } else {
+      // wait for enter key being pressed
+      goal.addEventListener("keydown", function(event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          var text = goal.value;
+          goal.setAttribute("disabled", "true");
+          // calculate remaining time based on current time
+          chrome.storage.sync.set({ goal: text }, function() {
+            timer_goal = text;
             chrome.runtime.sendMessage({ msg: "send_cur_timer_values" });
-          }
-        });
-      }
-    });
+          });
+        }
+      });
+    }
   }
 
-  update_timer_goal();
+  //update_timer_goal();
   // update remaining time values and colour
   function update_remaining_time(hr_local, min_local) {
     var hr_element = document.querySelector("#hr_val_rem");
@@ -125,62 +111,98 @@ document.addEventListener("DOMContentLoaded", function(event) {
     console.log("here now");
     port.onMessage.addListener(function(msg) {
       if (msg.id == "bg") {
-        chrome.storage.sync.get("pomodoro", function(result) {
-          console.log("time changed" + msg.timer_min + msg.timer_hr);
-          console.log(msg);
-          console.log("this is the goal:" + timer_goal);
-          temp_pomodoro_option = result.pomodoro;
+        chrome.storage.sync.get(
+          ["goal", "goal_set_timer_values", "pomodoro"],
+          function(result) {
+            update_timer_goal(msg.timer_hr, msg.timer_min, result);
+            console.log("time changed" + msg.timer_min + msg.timer_hr);
+            console.log("rimer so far" + local_goal_set_timer_values);
+            console.log(msg);
+            console.log("this is the goal:" + timer_goal);
+            temp_pomodoro_option = result.pomodoro;
 
-          var remaining_hr =
-            timer_goal == -1
-              ? -1
-              : parseInt(
-                  (Math.round(timer_goal * 60) -
+            var remaining_hr =
+              timer_goal == -1
+                ? -1
+                : parseInt(
+                    (Math.round(timer_goal * 60) -
+                      msg.timer_hr * 60 -
+                      msg.timer_min +
+                      local_goal_set_timer_values) /
+                      60
+                  );
+            var remaining_min =
+              timer_goal == -1
+                ? -1
+                : (Math.round(timer_goal * 60) -
                     msg.timer_hr * 60 -
-                    msg.timer_min) /
-                    60
-                );
-          var remaining_min =
-            timer_goal == -1
-              ? -1
-              : (Math.round(timer_goal * 60) -
-                  msg.timer_hr * 60 -
-                  msg.timer_min) %
-                60;
+                    msg.timer_min +
+                    local_goal_set_timer_values) %
+                  60;
 
-          console.log("rem hr" + remaining_hr);
-          console.log("rem min" + remaining_min);
+            console.log("rem hr" + remaining_hr);
+            console.log("rem min" + remaining_min);
 
-          update_remaining_time(remaining_hr, remaining_min);
-          update_pomodoro_value();
+            update_remaining_time(remaining_hr, remaining_min);
+            update_pomodoro_value();
 
-          // if goal is accomplished, show notif and flashing text
-          if (remaining_hr == 0 && remaining_min == 0) {
-            chrome.notifications.create({
-              type: "basic",
-              iconUrl: "icon.png",
-              title: "Well Done",
-              message: "Today's Goal Accomplished"
-            });
-            // check if popup open and then click button to pause
-            chrome.runtime.sendMessage({ msg: "update_newtab" });
-            chrome.storage.sync.set({ btn_text: "CONTINUE" }, function() {
-              if (number_of_flashes == 0) {
-                timer_goal = -1;
-                chrome.storage.sync.set({ goal: -1 }, function() {
-                  // for (var x = 0; x < 11; x++) window.setTimeout(flash, 1000 * x);
-                  number_of_flashes++;
-                  goal.removeAttribute("disabled");
-                  goal.value = "";
-                  flash();
-                  pomodoro_interval_element.style.visibility = "visible";
-                  pomodoro_option_element.style.visibility = "visible";
-                  console.log("haha" + goal.disabled);
-                });
-              }
-            });
+            // if goal is accomplished, show notif and flashing text
+            if (remaining_hr == 0 && remaining_min == 0) {
+              chrome.notifications.create({
+                type: "basic",
+                iconUrl: "icon.png",
+                title: "Well Done",
+                message: "Today's Goal Accomplished"
+              });
+              // check if popup open and then click button to pause
+              chrome.runtime.sendMessage({ msg: "update_newtab" });
+              chrome.storage.sync.set({ btn_text: "CONTINUE" }, function() {
+                if (number_of_flashes == 0) {
+                  timer_goal = -1;
+                  chrome.storage.sync.set({ goal: -1 }, function() {
+                    // for (var x = 0; x < 11; x++) window.setTimeout(flash, 1000 * x);
+                    number_of_flashes++;
+                    goal.removeAttribute("disabled");
+                    goal.value = "";
+                    flash();
+                    pomodoro_interval_element.style.visibility = "visible";
+                    pomodoro_option_element.style.visibility = "visible";
+                    console.log("haha" + goal.disabled);
+                  });
+                }
+              });
+            }
           }
-        });
+        );
+      } else if (msg.id == "bg_timer_values") {
+        console.log("timer values are sent" + local_goal_set_timer_values);
+        console.log(msg);
+        //  if (local_goal_set_timer_values != msg.timer_min + msg.timer_hr * 60) {
+        local_goal_set_timer_values = msg.timer_min + msg.timer_hr * 60;
+        chrome.storage.sync.set(
+          {
+            goal_set_timer_values: local_goal_set_timer_values
+          },
+          function() {
+            remaining_time = Math.round(parseFloat(timer_goal) * 60);
+            console.log(
+              "remaining_time is hhere " +
+                remaining_time +
+                "and hr" +
+                parseInt(remaining_time / 60) +
+                "and min" +
+                (remaining_time % 60)
+            );
+            update_remaining_time(
+              parseInt(parseInt(remaining_time / 60)),
+              parseInt(remaining_time % 60)
+            );
+            total_remaining_time_element.style.visibility = "visible";
+            pomodoro_interval_element.style.visibility = "hidden";
+            pomodoro_option_element.style.visibility = "hidden";
+          }
+        );
+        //  }
       }
     });
   }
@@ -273,6 +295,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
   document
     .querySelector("#pomodoro_value")
     .appendChild(document.createTextNode(temp_pomodoro_option));
+
+  chrome.storage.sync.get("goal_set_timer_values", function(result) {
+    local_goal_set_timer_values = result.goal_set_timer_values;
+  });
 
   // indicate to background.js that new tab has been opened
   chrome.runtime.sendMessage({ msg: "newtab_open" });

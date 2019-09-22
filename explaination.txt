@@ -5,9 +5,7 @@ sent:
 "update_newtab" -> background.js: if remaining time == 0 and popup is open, pause timer on popup
 "send_cur_timer_values" -> background.js: if goal has just been set, calculate value of remaining time
 received: 
-NONE
 popup.js
 sent:
 "popup_open" -> background.js: indicate that pop up has been opened to send time data and timer state
 received:
-NONE
