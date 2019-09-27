@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", function(event) {
   // first ask background for timer
   var interval;
-  var local_goal_set_timer_values = 0;
+  var local_goal_set_timer_values = -1;
   var remaining_time;
   var timer_goal = -1;
   var temp_pomodoro_option;
@@ -177,32 +177,33 @@ document.addEventListener("DOMContentLoaded", function(event) {
       } else if (msg.id == "bg_timer_values") {
         console.log("timer values are sent" + local_goal_set_timer_values);
         console.log(msg);
-        //  if (local_goal_set_timer_values != msg.timer_min + msg.timer_hr * 60) {
-        local_goal_set_timer_values = msg.timer_min + msg.timer_hr * 60;
-        chrome.storage.sync.set(
-          {
-            goal_set_timer_values: local_goal_set_timer_values
-          },
-          function() {
-            remaining_time = Math.round(parseFloat(timer_goal) * 60);
-            console.log(
-              "remaining_time is hhere " +
-                remaining_time +
-                "and hr" +
-                parseInt(remaining_time / 60) +
-                "and min" +
-                (remaining_time % 60)
-            );
-            update_remaining_time(
-              parseInt(parseInt(remaining_time / 60)),
-              parseInt(remaining_time % 60)
-            );
-            total_remaining_time_element.style.visibility = "visible";
-            pomodoro_interval_element.style.visibility = "hidden";
-            pomodoro_option_element.style.visibility = "hidden";
-          }
-        );
-        //  }
+        // if statement prevents timer values from being sent multiple times
+        if (local_goal_set_timer_values != msg.timer_min + msg.timer_hr * 60) {
+          local_goal_set_timer_values = msg.timer_min + msg.timer_hr * 60;
+          chrome.storage.sync.set(
+            {
+              goal_set_timer_values: local_goal_set_timer_values
+            },
+            function() {
+              remaining_time = Math.round(parseFloat(timer_goal) * 60);
+              console.log(
+                "remaining_time is hhere " +
+                  remaining_time +
+                  "and hr" +
+                  parseInt(remaining_time / 60) +
+                  "and min" +
+                  (remaining_time % 60)
+              );
+              update_remaining_time(
+                parseInt(parseInt(remaining_time / 60)),
+                parseInt(remaining_time % 60)
+              );
+              total_remaining_time_element.style.visibility = "visible";
+              pomodoro_interval_element.style.visibility = "hidden";
+              pomodoro_option_element.style.visibility = "hidden";
+            }
+          );
+        }
       }
     });
   }
