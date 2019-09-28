@@ -7,6 +7,8 @@ var interval;
 var initial = false;
 var newtab_port;
 var time_so_far;
+var local_goal_set_timer_values;
+var rem_time_change = 0;
 
 // upon first install, store 00:00 for value of timer in the storage
 function store_initial_timer_values(info) {
@@ -79,7 +81,7 @@ function establish_long_connection(request, sender) {
     chrome.storage.sync.get("pomodoro", function(result) {
       local_pomodoro = result.pomodoro;
       newtab_port.postMessage({
-        id: "bg",
+        id: "newtab_opened",
         timer_min: local_min,
         timer_hr: local_hr,
         timer_sec: local_sec,
@@ -114,6 +116,18 @@ function configure_timer(changes, namespace) {
   if (changes.hasOwnProperty("timer_sec")) {
     local_sec = changes["timer_sec"].newValue;
   }
+
+  if (changes.hasOwnProperty("goal_set_timer_values")) {
+    local_goal_set_timer_values = changes["goal_set_timer_values"].newValue;
+    rem_time_change = parseInt(
+      (local_goal_set_timer_values -
+        local_hr * 60 * 60 -
+        local_min * 60 -
+        local_sec +
+        59) %
+        60
+    );
+  }
   configure_pomodoro(changes);
 }
 
@@ -147,14 +161,21 @@ function run_timer() {
   } else {
     local_sec++;
   }
-  if (local_sec == 0) {
+  if (
+    rem_time_change !=
+    parseInt(
+      (local_goal_set_timer_values -
+        local_hr * 60 * 60 -
+        local_min * 60 -
+        local_sec +
+        59) %
+        60
+    )
+  ) {
     newtab_port.postMessage({
-      id: "bg",
-      timer_min: local_min,
-      timer_hr: local_hr,
-      timer_sec: local_sec,
-      pomodoro: local_pomodoro
+      id: "newtab_rem_time_change"
     });
+    rem_time_change--;
   }
   if (local_min == 60) {
     local_hr++;

@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
   function establish_connection(port) {
     console.log("here now");
     port.onMessage.addListener(function(msg) {
-      if (msg.id == "bg") {
+      if (msg.id == "newtab_opened") {
         chrome.storage.sync.get(
           ["goal", "goal_set_timer_values", "pomodoro"],
           function(result) {
@@ -124,27 +124,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
             console.log(msg);
             console.log("this is the goal:" + timer_goal);
             temp_pomodoro_option = result.pomodoro;
-            var remaining_hr =
-              timer_goal == -1
-                ? -1
-                : parseInt(
-                    (local_goal_set_timer_values -
-                      msg.timer_hr * 60 * 60 -
-                      msg.timer_min * 60 -
-                      msg.timer_sec) /
-                      3600
-                  );
+            var remaining_hr = timer_goal == -1 ? -1 : parseInt(timer_goal);
             var remaining_min =
-              timer_goal == -1
-                ? -1
-                : parseInt(
-                    (59 +
-                      local_goal_set_timer_values -
-                      msg.timer_hr * 60 * 60 -
-                      msg.timer_min * 60 -
-                      msg.timer_sec) /
-                      60
-                  ) % 60;
+              timer_goal == -1 ? -1 : Math.round(timer_goal * 60) % 60;
 
             console.log("rem hr" + remaining_hr);
             console.log("rem min" + remaining_min);
