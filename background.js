@@ -119,12 +119,13 @@ function configure_timer(changes, namespace) {
 
   if (changes.hasOwnProperty("goal_set_timer_values")) {
     local_goal_set_timer_values = changes["goal_set_timer_values"].newValue;
+    console.log("yupp");
     rem_time_change = parseInt(
       (local_goal_set_timer_values -
         local_hr * 60 * 60 -
         local_min * 60 -
         local_sec +
-        59) %
+        59) /
         60
     );
   }
@@ -168,10 +169,18 @@ function run_timer() {
         local_hr * 60 * 60 -
         local_min * 60 -
         local_sec +
-        59) %
+        59) /
         60
     )
   ) {
+    console.log(
+      local_goal_set_timer_values -
+        local_hr * 60 * 60 -
+        local_min * 60 -
+        local_sec +
+        59
+    );
+    console.log("here" + local_goal_set_timer_values);
     newtab_port.postMessage({
       id: "newtab_rem_time_change"
     });
@@ -267,7 +276,7 @@ function message_sent(request, sender) {
   if (request.msg == "send_cur_timer_values") {
     // request sent by newtab to calculate remaining time
     newtab_port.postMessage({
-      id: "bg_timer_values",
+      id: "goal_set",
       timer_min: local_min,
       timer_hr: local_hr,
       timer_sec: local_sec

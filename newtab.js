@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", function(event) {
   var local_goal_set_timer_values = -22;
   var remaining_time;
   var timer_goal = -1;
+  var remaining_hr;
+  var remaining_min;
   var temp_pomodoro_option;
   var html_pomodoro_option_text;
   var pomodoro_on_or_off_element = document.querySelector(
@@ -32,9 +34,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
           current_timer_min +
           local_goal_set_timer_values
       );
-      total_remaining_time_element.style.visibility = "visible";
-      pomodoro_interval_element.style.visibility = "hidden";
-      pomodoro_option_element.style.visibility = "hidden";
+      if (total_remaining_time_element.style.visibility != "visible")
+        flip_visibility();
+      console.log("FLIPEED HERERE");
     } else {
       // wait for enter key being pressed
       goal.addEventListener("keydown", function(event) {
@@ -103,120 +105,122 @@ document.addEventListener("DOMContentLoaded", function(event) {
         ",0)");
   }
 
+  function flip_visibility() {
+    if (total_remaining_time_element.style.visibility == "visible") {
+      total_remaining_time_element.style.visibility = "hidden";
+      pomodoro_interval_element.style.visibility = "visible";
+      pomodoro_option_element.style.visibility = "visible";
+    } else {
+      total_remaining_time_element.style.visibility = "visible";
+      pomodoro_interval_element.style.visibility = "hidden";
+      pomodoro_option_element.style.visibility = "hidden";
+    }
+  }
+
   var goal_accomplished_interval;
-  var number_of_flashes = 0;
+
+  function update_initial_values(msg, result) {
+    update_timer_goal(msg.timer_hr, msg.timer_min, result);
+    console.log("time changed" + msg.timer_min + msg.timer_hr);
+    console.log(
+      "the timervalue at which the goal is met" + local_goal_set_timer_values
+    );
+    console.log(msg);
+    console.log("this is the goal:" + timer_goal);
+    temp_pomodoro_option = result.pomodoro;
+    remaining_hr =
+      timer_goal == -1
+        ? -1
+        : parseInt(
+            (local_goal_set_timer_values -
+              msg.timer_hr * 60 * 60 -
+              msg.timer_min * 60 -
+              msg.timer_sec) /
+              3600
+          );
+    remaining_min =
+      timer_goal == -1
+        ? -1
+        : parseInt(
+            (local_goal_set_timer_values -
+              msg.timer_hr * 60 * 60 -
+              msg.timer_min * 60 -
+              msg.timer_sec +
+              59) /
+              60
+          ) % 60;
+
+    console.log("rem hr" + remaining_hr);
+    console.log("rem min" + remaining_min);
+
+    update_remaining_time(remaining_hr, remaining_min);
+    update_pomodoro_value();
+  }
 
   // indicate to background.js that newtab.html has opened and receive current timer values
   // to calculate and then display remaining time
   function establish_connection(port) {
     console.log("here now");
     port.onMessage.addListener(function(msg) {
-      if (msg.id == "newtab_opened") {
+      if (msg.id == "newtab_opened" || msg.id == "goal_set") {
         chrome.storage.sync.get(
           ["goal", "goal_set_timer_values", "pomodoro"],
           function(result) {
-            update_timer_goal(msg.timer_hr, msg.timer_min, result);
-            console.log("time changed" + msg.timer_min + msg.timer_hr);
-            console.log(
-              "the timervalue at which the goal is met" +
-                local_goal_set_timer_values
-            );
-            console.log(msg);
-            console.log("this is the goal:" + timer_goal);
-            temp_pomodoro_option = result.pomodoro;
-            var remaining_hr = timer_goal == -1 ? -1 : parseInt(timer_goal);
-            var remaining_min =
-              timer_goal == -1 ? -1 : Math.round(timer_goal * 60) % 60;
-
-            console.log("rem hr" + remaining_hr);
-            console.log("rem min" + remaining_min);
-
-            update_remaining_time(remaining_hr, remaining_min);
-            update_pomodoro_value();
-
-            // if goal is accomplished, show notif and flashing text
-            if (remaining_hr == 0 && remaining_min == 0) {
-              chrome.notifications.create({
-                type: "basic",
-                iconUrl: "icon.png",
-                title: "Well Done",
-                message: "Today's Goal Accomplished"
-              });
-              // check if popup open and then click button to pause
-              chrome.runtime.sendMessage({ msg: "update_newtab" });
-              chrome.storage.sync.set({ btn_text: "CONTINUE" }, function() {
-                if (number_of_flashes == 0) {
-                  timer_goal = -1;
-                  chrome.storage.sync.set({ goal: -1 }, function() {
-                    // for (var x = 0; x < 11; x++) window.setTimeout(flash, 1000 * x);
-                    number_of_flashes++;
-                    goal.removeAttribute("disabled");
-                    goal.value = "";
-                    flash();
-                    pomodoro_interval_element.style.visibility = "visible";
-                    pomodoro_option_element.style.visibility = "visible";
-                    console.log("haha" + goal.disabled);
-                  });
+            if (msg.id == "goal_set") {
+              local_goal_set_timer_values =
+                Math.round(timer_goal * 60 * 60) +
+                msg.timer_hr * 60 * 60 +
+                msg.timer_min * 60 +
+                msg.timer_sec;
+              chrome.storage.sync.set(
+                { goal_set_timer_values: local_goal_set_timer_values },
+                function() {
+                  update_initial_values(msg, result);
                 }
-              });
+              );
+            } else {
+              update_initial_values(msg, result);
             }
           }
         );
-      } else if (msg.id == "bg_timer_values") {
+      } else if (msg.id == "newtab_rem_time_change") {
         console.log(
-          "timer values are sent the time at which" +
-            local_goal_set_timer_values
+          "timechange rem hr" + remaining_hr + "rem min" + remaining_min
         );
-        console.log(msg);
-        // if statement prevents timer values from being sent multiple times
-        if (
-          local_goal_set_timer_values !=
-          Math.round(timer_goal * 60 * 60) +
-            msg.timer_sec +
-            msg.timer_min * 60 +
-            msg.timer_hr * 60 * 60
-        ) {
-          local_goal_set_timer_values =
-            Math.round(timer_goal * 60 * 60) +
-            msg.timer_sec +
-            msg.timer_min * 60 +
-            msg.timer_hr * 60 * 60;
-          chrome.storage.sync.set(
-            {
-              goal_set_timer_values: local_goal_set_timer_values
-            },
-            function() {
-              remaining_time = Math.round(parseFloat(timer_goal) * 60);
-              console.log(
-                "remaining_time is hhere " +
-                  remaining_time +
-                  "and hr" +
-                  parseInt(remaining_time / 60) +
-                  "and min" +
-                  (remaining_time % 60)
-              );
-              update_remaining_time(
-                parseInt(parseInt(remaining_time / 60)),
-                parseInt(remaining_time % 60)
-              );
-              total_remaining_time_element.style.visibility = "visible";
-              pomodoro_interval_element.style.visibility = "hidden";
-              pomodoro_option_element.style.visibility = "hidden";
-            }
+        if (remaining_min == 0) {
+          remaining_min = 59;
+          update_remaining_time(--remaining_hr, remaining_min);
+        } else {
+          update_remaining_time(remaining_hr, --remaining_min);
+          // if goal is accomplished, show notif and flashing text
+          if (remaining_hr == 0 && remaining_min == 0) {
+            chrome.notifications.create({
+              type: "basic",
+              iconUrl: "icon.png",
+              title: "Well Done",
+              message: "Today's Goal Accomplished"
+            });
+            // check if popup open and then click button to pause
+            chrome.runtime.sendMessage({ msg: "update_newtab" });
+            chrome.storage.sync.set({ btn_text: "CONTINUE" }, function() {
+              timer_goal = -1;
+              chrome.storage.sync.set({ goal: -1 }, function() {
+                goal.removeAttribute("disabled");
+                goal.value = "";
+                flip_visibility();
+                console.log("haha" + goal.disabled);
+              });
+            });
+          }
+          console.log(
+            "timer values are sent the time at which" +
+              local_goal_set_timer_values
           );
+          console.log(msg);
+          // if statement prevents timer values from being sent multiple times
         }
       }
     });
-  }
-
-  // switch the visibility of the remaining time display
-  function flash() {
-    console.log(number_of_flashes + "<-num of flashes");
-    if (total_remaining_time_element.style.visibility == "visible") {
-      total_remaining_time_element.style.visibility = "hidden";
-    } else {
-      total_remaining_time_element.style.visibility = "visible";
-    }
   }
 
   function update_pomodoro_value() {
