@@ -32,7 +32,7 @@ function store_initial_timer_values(info) {
         curr_date: day,
         goal: -1,
         pomodoro: -1,
-        goal_set_timer_values: 0
+        goal_set_timer_values: -22
       },
       function() {
         console.log("stored it");
@@ -82,6 +82,7 @@ function establish_long_connection(request, sender) {
         id: "bg",
         timer_min: local_min,
         timer_hr: local_hr,
+        timer_sec: local_sec,
         pomodoro: local_pomodoro
       });
     });
@@ -151,6 +152,7 @@ function run_timer() {
       id: "bg",
       timer_min: local_min,
       timer_hr: local_hr,
+      timer_sec: local_sec,
       pomodoro: local_pomodoro
     });
   }
@@ -246,7 +248,8 @@ function message_sent(request, sender) {
     newtab_port.postMessage({
       id: "bg_timer_values",
       timer_min: local_min,
-      timer_hr: local_hr
+      timer_hr: local_hr,
+      timer_sec: local_sec
     });
   } else {
     // request sent by popup or new tab opening

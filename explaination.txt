@@ -9,3 +9,8 @@ popup.js
 sent:
 "popup_open" -> background.js: indicate that pop up has been opened to send time data and timer state
 received:
+
+
+
+Variable explainations:
+goal_set_timer_values <- timer value at which the goal would be met

@@ -2,7 +2,7 @@
 document.addEventListener("DOMContentLoaded", function(event) {
   // first ask background for timer
   var interval;
-  var local_goal_set_timer_values = -1;
+  var local_goal_set_timer_values = -22;
   var remaining_time;
   var timer_goal = -1;
   var temp_pomodoro_option;
@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
           event.preventDefault();
           var text = goal.value;
           goal.setAttribute("disabled", "true");
+          console.log("this is the goal" + text);
           // calculate remaining time based on current time
           chrome.storage.sync.set({ goal: text }, function() {
             timer_goal = text;
@@ -116,29 +117,34 @@ document.addEventListener("DOMContentLoaded", function(event) {
           function(result) {
             update_timer_goal(msg.timer_hr, msg.timer_min, result);
             console.log("time changed" + msg.timer_min + msg.timer_hr);
-            console.log("rimer so far" + local_goal_set_timer_values);
+            console.log(
+              "the timervalue at which the goal is met" +
+                local_goal_set_timer_values
+            );
             console.log(msg);
             console.log("this is the goal:" + timer_goal);
             temp_pomodoro_option = result.pomodoro;
-
             var remaining_hr =
               timer_goal == -1
                 ? -1
                 : parseInt(
-                    (Math.round(timer_goal * 60) -
-                      msg.timer_hr * 60 -
-                      msg.timer_min +
-                      local_goal_set_timer_values) /
-                      60
+                    (local_goal_set_timer_values -
+                      msg.timer_hr * 60 * 60 -
+                      msg.timer_min * 60 -
+                      msg.timer_sec) /
+                      3600
                   );
             var remaining_min =
               timer_goal == -1
                 ? -1
-                : (Math.round(timer_goal * 60) -
-                    msg.timer_hr * 60 -
-                    msg.timer_min +
-                    local_goal_set_timer_values) %
-                  60;
+                : parseInt(
+                    (59 +
+                      local_goal_set_timer_values -
+                      msg.timer_hr * 60 * 60 -
+                      msg.timer_min * 60 -
+                      msg.timer_sec) /
+                      60
+                  ) % 60;
 
             console.log("rem hr" + remaining_hr);
             console.log("rem min" + remaining_min);
@@ -175,11 +181,24 @@ document.addEventListener("DOMContentLoaded", function(event) {
           }
         );
       } else if (msg.id == "bg_timer_values") {
-        console.log("timer values are sent" + local_goal_set_timer_values);
+        console.log(
+          "timer values are sent the time at which" +
+            local_goal_set_timer_values
+        );
         console.log(msg);
         // if statement prevents timer values from being sent multiple times
-        if (local_goal_set_timer_values != msg.timer_min + msg.timer_hr * 60) {
-          local_goal_set_timer_values = msg.timer_min + msg.timer_hr * 60;
+        if (
+          local_goal_set_timer_values !=
+          Math.round(timer_goal * 60 * 60) +
+            msg.timer_sec +
+            msg.timer_min * 60 +
+            msg.timer_hr * 60 * 60
+        ) {
+          local_goal_set_timer_values =
+            Math.round(timer_goal * 60 * 60) +
+            msg.timer_sec +
+            msg.timer_min * 60 +
+            msg.timer_hr * 60 * 60;
           chrome.storage.sync.set(
             {
               goal_set_timer_values: local_goal_set_timer_values
