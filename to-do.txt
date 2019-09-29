@@ -18,6 +18,7 @@ v1
 - goal can only be set once per day so add new storage value: (stored value so far), think about timer running 
 without goal being set
 - calculate color value of remaining time
+- pause popup timer once goal is reached if popup is still open
 
 v2
 - give user the option to view graph 
