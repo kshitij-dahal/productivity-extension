@@ -6,8 +6,6 @@ v1
 - add hour in timer x
 - if its new day, store last days value in storage x
 - show the days that the goal was met on the calendar in newtab
-- create options page
-- create new tab page -- 
 - add pomodoro mode
 - add calendar streak view
 - add calendar time view
@@ -19,6 +17,7 @@ v1
 - after goal is finished, time remaining acts wierd if timer continues
 - goal can only be set once per day so add new storage value: (stored value so far), think about timer running 
 without goal being set
+- calculate color value of remaining time
 
 v2
 - give user the option to view graph 
