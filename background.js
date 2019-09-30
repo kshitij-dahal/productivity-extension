@@ -128,6 +128,7 @@ function configure_timer(changes, namespace) {
         59) /
         60
     );
+    console.log("yupp" + rem_time_change);
   }
   configure_pomodoro(changes);
 }
@@ -163,15 +164,16 @@ function run_timer() {
     local_sec++;
   }
   if (
+    local_goal_set_timer_values != -22 &&
     rem_time_change !=
-    parseInt(
-      (local_goal_set_timer_values -
-        local_hr * 60 * 60 -
-        local_min * 60 -
-        local_sec +
-        59) /
-        60
-    )
+      parseInt(
+        (local_goal_set_timer_values -
+          local_hr * 60 * 60 -
+          local_min * 60 -
+          local_sec +
+          59) /
+          60
+      )
   ) {
     console.log(
       local_goal_set_timer_values -
@@ -290,13 +292,21 @@ function message_sent(request, sender) {
 chrome.runtime.onInstalled.addListener(store_initial_timer_values);
 
 chrome.storage.sync.get(
-  ["timer_hr", "timer_min", "timer_sec", "btn_text", "pomodoro"],
+  [
+    "timer_hr",
+    "timer_min",
+    "timer_sec",
+    "btn_text",
+    "pomodoro",
+    "goal_set_timer_values"
+  ],
   function(result) {
     local_hr = result.timer_hr;
     local_min = result.timer_min;
     local_sec = result.timer_sec;
     local_btn_text = result.btn_text;
     local_pomodoro = result.pomodoro;
+    local_goal_set_timer_values = result.goal_set_timer_values;
     console.log("gotem " + local_btn_text);
     chrome.runtime.onMessage.addListener(message_sent);
   }

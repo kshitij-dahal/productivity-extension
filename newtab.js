@@ -96,7 +96,15 @@
             update_remaining_time(remaining_hr, --remaining_min);
             // if goal is accomplished, show notif and flashing text
             if (remaining_hr == 0 && remaining_min == 0) {
-              timer_goal_accomplished();
+              local_goal_set_timer_values = -22;
+              timer_goal = -1;
+              chrome.storage.sync.set(
+                {
+                  goal_set_timer_values: local_goal_set_timer_values,
+                  goal: timer_goal
+                },
+                timer_goal_accomplished
+              );
             }
           }
         }
@@ -124,7 +132,6 @@
       console.log(
         "timer values are sent the time at which" + local_goal_set_timer_values
       );
-      // if statement prevents timer values from being sent multiple times
     }
 
     function update_initial_values(msg, result) {

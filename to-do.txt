@@ -12,6 +12,7 @@ v1
 - bugs: set 1h goal and remaining time shows 59 min
 - bug: setting goal right away when tab loads
 - bug: IF GOAL IS SET AT SOME MIN AND SOME SEC THEN IT WONT FINISH AT THAT SEC BECAUSE BACKGROUND ONLY SENDS VALUE AT EVERY MINUTE SO FIX THAT
+- bug: start timer right away without goal, still sends notif x
 - make pomodoro mode work if it is on (aka not show notifs) x
 - after goal is reached, change the flashing message
 - after goal is finished, time remaining acts wierd if timer continues
